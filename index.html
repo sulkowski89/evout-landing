@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,9 +8,9 @@
     :root { --bg:#000; --fg:#fff; }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif}
 
-    /* PRELOADER */
+    /* ===== PRELOADER ===== */
     #preloader,#app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-    #preloader{background:#000;transition:opacity .4s ease}
+    #preloader{background:#000;transition:opacity .4s ease;z-index:100}
     .swirl{
       width:min(50vmin,280px);height:min(50vmin,280px);border-radius:50%;
       background:conic-gradient(from 0deg,#4af,#0ff,#8f8,#4af);
@@ -21,43 +21,52 @@
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* APP */
+    /* ===== APP CONTAINER ===== */
     #app{opacity:0;pointer-events:none;transition:opacity .6s ease}
     #app.show{opacity:1;pointer-events:auto}
 
-    /* LOGO */
+    /* ===== LANDING LOGO ===== */
     .logo{
       margin:0;white-space:nowrap;line-height:1;font-weight:800;letter-spacing:.08em;
       font-size:clamp(40px,20vw,16rem);
+      color:#fff;
       opacity:0;transform:translateY(8px);
-      animation:fadeInUp .8s ease 60ms both, pulse 2.6s ease-in-out .9s infinite alternate;
-      cursor:pointer;outline:none;user-select:none
+      animation: fadeInUp .8s ease 60ms both,
+                 pulse 2.6s ease-in-out .9s infinite alternate;
+      cursor:pointer;outline:none;user-select:none;z-index:1;
+      text-shadow:0 0 12px rgba(255,255,255,.08);
+      position:relative;
     }
     @keyframes fadeInUp{to{opacity:1;transform:none}}
     @keyframes pulse{to{transform:scale(1.035)}}
+    @keyframes fadeOutUp{to{opacity:0;transform:translateY(-6px)}}
+    .logo.fadeout{animation: fadeOutUp .25s ease forwards}
 
-    /* LANGUAGE MODAL */
-    #lang{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:saturate(120%) blur(2px)}
+    /* ===== LANGUAGE MODAL ===== */
+    #lang{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:saturate(120%) blur(2px);z-index:10}
     #lang.show{display:grid}
     .card{padding:24px 22px;border-radius:18px;background:#0b0b0b;box-shadow:0 10px 30px rgba(0,0,0,.5);min-width:min(92vw,480px);text-align:center}
-    .row{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-    .btn{padding:10px 14px;border-radius:12px;background:#111;color:#fff;border:1px solid #222;font-weight:700;letter-spacing:.04em;cursor:pointer}
+    .row{
+      display:flex;flex-direction:column;gap:12px;align-items:stretch;margin-top:14px
+    }
+    .btn{
+      padding:12px 16px;border-radius:12px;background:#111;color:#fff;border:1px solid #222;
+      font-weight:700;letter-spacing:.04em;cursor:pointer
+    }
     .btn:hover{border-color:#444}
 
-    /* HERO */
+    /* ===== HERO ===== */
     #hero{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px}
     #hero.show{display:grid}
-    .hero-wrap{
-      width:clamp(92vw, 60vw, 1100px); /* 60% ekranu na desktopie, wygodnie na mobile */
-      margin:0 auto;
+    .hero-wrap{width:min(60vw,1100px);margin:0 auto}
+    @media (max-width: 900px){
+      .hero-wrap{width:92vw}
     }
-    .hero-title{margin:0 0 .3em;font-weight:800;letter-spacing:.04em;line-height:1;
-      font-size:clamp(48px,12vw,140px)}
-    .hero-tagline{margin:.1em 0 .35em;opacity:.9;font-weight:600;
-      font-size:clamp(16px,3.2vw,28px)}
-    .hero-soon{margin:0;opacity:.75;letter-spacing:.08em;text-transform:uppercase;
-      font-size:clamp(12px,2.2vw,16px)}
+    .hero-title{margin:0 0 .3em;font-weight:800;letter-spacing:.04em;line-height:1;font-size:clamp(48px,12vw,140px)}
+    .hero-tagline{margin:.1em 0 .35em;opacity:.9;font-weight:600;font-size:clamp(16px,3.2vw,28px)}
+    .hero-soon{margin:0;opacity:.75;letter-spacing:.08em;text-transform:uppercase;font-size:clamp(12px,2.2vw,16px)}
 
+    /* ===== REDUCED MOTION ===== */
     @media (prefers-reduced-motion: reduce){
       .swirl{animation:none}
       .logo{animation:none;opacity:1;transform:none}
@@ -75,14 +84,14 @@
   <div id="app" role="main" aria-live="polite">
     <h1 class="logo" id="logo" tabindex="0" role="button" aria-label="Wejdź do EVOUT">EVOUT</h1>
 
-    <!-- Language chooser -->
+    <!-- LANGUAGE CHOOSER -->
     <div id="lang" aria-modal="true" role="dialog" aria-label="Wybór języka">
       <div class="card">
         <h3>Wybierz język / Choose language</h3>
         <div class="row">
-          <button class="btn" data-lang="pl">Polski</button>
-          <button class="btn" data-lang="de">Deutsch</button>
           <button class="btn" data-lang="en">English</button>
+          <button class="btn" data-lang="de">Deutsch</button>
+          <button class="btn" data-lang="pl">Polski</button>
         </div>
       </div>
     </div>
@@ -98,7 +107,7 @@
   </div>
 
   <script>
-    // skip intro for testing: ?skipintro=1
+    // ?skipintro=1 to bypass preloader during dev
     const params = new URLSearchParams(location.search);
     const skip = params.get('skipintro') === '1';
 
@@ -137,15 +146,18 @@
       setTimeout(()=>{ pre.style.display='none'; app.classList.add('show'); }, 400);
     }
 
-    // start
+    // Start: preloader 3s (or skip for dev)
     if (skip) { showApp(); } else { setTimeout(showApp, 3000); }
 
-    // click logo -> language
-    function openLang(){ lang.classList.add('show'); }
+    // Open language modal → fade out logo
+    function openLang(){
+      logo.classList.add('fadeout');   // ukryj logo
+      setTimeout(()=>{ lang.classList.add('show'); }, 120);
+    }
     logo.addEventListener('click', openLang);
     logo.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') openLang(); });
 
-    // choose language -> hero
+    // Choose language → apply i18n → show hero
     lang.addEventListener('click', (e)=>{
       const btn = e.target.closest('[data-lang]');
       if(!btn) return;
@@ -157,7 +169,7 @@
       hero.scrollIntoView({behavior:'smooth', block:'center'});
     });
 
-    // If language was chosen before, skip picker next time
+    // If language remembered, apply it (but logo i modal pokaż normalnie)
     const remembered = localStorage.getItem('evout_lang');
     if (remembered) applyLang(remembered);
   </script>
