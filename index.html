@@ -5,52 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EVOUT</title>
   <style>
-    /* Layout */
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: #000;
-    }
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    :root { --bg:#000; --fg:#fff; }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif}
 
-    /* Napis */
-    h1 {
-      margin: 0;
-      color: #fff;
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      white-space: nowrap;           /* zawsze w jednej linii */
-      font-size: 20vw;               /* ~70% szerokości dla „EVOUT” */
-      line-height: 1;
-      opacity: 0;
-      transform: translateY(12px);
-      animation: fadeInUp 900ms ease-out forwards 150ms;
+    /* ========== PRELOADER (3s) ========== */
+    #preloader, #app {position:fixed; inset:0; display:flex; align-items:center; justify-content:center}
+    #preloader{background:#000; transition:opacity .4s ease}
+    .swirl{
+      width:min(50vmin,280px); height:min(50vmin,280px);
+      border-radius:50%;
+      background: conic-gradient(from 0deg, #4af, #0ff, #8f8, #4af);
+      -webkit-mask: radial-gradient(circle at center, transparent 44%, #000 45% 100%);
+              mask: radial-gradient(circle at center, transparent 44%, #000 45% 100%);
+      filter: blur(1px) drop-shadow(0 0 16px #0ff);
+      animation: spin 1.2s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg) } }
 
-    /* Animacja */
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* ========== APP (ukryte do czasu końca preloadera) ========== */
+    #app{opacity:0; pointer-events:none; transition:opacity .6s ease}
+    #app.show{opacity:1; pointer-events:auto}
+
+    /* Logo EVOUT */
+    .logo{
+      margin:0; white-space:nowrap; line-height:1;
+      font-weight:800; letter-spacing:.08em;
+      font-size: clamp(40px, 20vw, 16rem);  /* ~70% szerokości */
+      transform: translateY(8px);
+      opacity:0; animation: fadeInUp .8s ease 60ms both;
+      cursor:pointer; outline:none; user-select:none;
     }
+    @keyframes fadeInUp { to { opacity:1; transform:none } }
 
-    /* Szanuj ustawienia systemowe dot. animacji */
-    @media (prefers-reduced-motion: reduce) {
-      h1 {
-        animation: none;
-        opacity: 1;
-        transform: none;
-      }
+    /* Delikatny puls po starcie */
+    .pulse{ animation: pulse 2.6s ease-in-out .9s infinite alternate }
+    @keyframes pulse { to { transform: scale(1.035) } }
+
+    /* Language modal */
+    #lang{
+      position:fixed; inset:0; display:none; place-items:center;
+      background:rgba(0,0,0,.6); backdrop-filter:saturate(120%) blur(2px);
+    }
+    #lang.show{ display:grid; }
+    .card{
+      padding:24px 22px; border-radius:18px; background:#0b0b0b; box-shadow:0 10px 30px rgba(0,0,0,.5);
+      min-width:min(92vw,480px); text-align:center
+    }
+    .row{display:flex; gap:12px; justify-content:center; margin-top:14px; flex-wrap:wrap}
+    .btn{
+      padding:10px 14px; border-radius:12px; background:#111; color:#fff; border:1px solid #222; font-weight:700;
+      letter-spacing:.04em; cursor:pointer
+    }
+    .btn:hover{ border-color:#444 }
+
+    /* Hero placeholder */
+    #hero{
+      position:absolute; inset:0; display:none; place-items:center; text-align:center; padding:24px
+    }
+    #hero.show{ display:grid; }
+    #hero h2{ margin:0 0 8px; font-size: clamp(22px, 6vw, 48px) }
+    #hero p{ opacity:.8; margin:0; font-size: clamp(14px, 2.6vw, 18px) }
+
+    /* Szacunek dla osób z ograniczoną animacją */
+    @media (prefers-reduced-motion: reduce){
+      .swirl{ animation:none }
+      .pulse{ animation:none }
+      .logo{ animation:none; opacity:1; transform:none }
+      #preloader{ transition:none }
+      #app{ transition:none }
     }
   </style>
 </head>
 <body>
-  <h1>EVOUT</h1>
+  <!-- PRELOADER -->
+  <div id="preloader" aria-hidden="true">
+    <div class="swirl" aria-label="Ładowanie"></div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" role="main" aria-live="polite">
+    <h1 class="logo pulse" id="logo" tabindex="0" role="button" aria-label="Wejdź do EVOUT">EVOUT</h1>
+
+    <!-- Language chooser -->
+    <div id="lang" aria-modal="true" role="dialog" aria-label="Wybór języka">
+      <div class="card">
+        <h3>Wybierz język / Choose language</h3>
+        <div class="row">
+          <button class="btn" data-lang="pl">Polski</button>
+          <button class="btn" data-lang="de">Deutsch</button>
+          <button class="btn" data-lang="en">English</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero (placeholder) -->
+    <section id="hero">
+      <div>
+        <h2>EVOUT — nowoczesne strony i automatyzacje</h2>
+        <p>Lightweight • Next.js • Headless CMS • EU-hosting</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Skip intro via ?skipintro=1
+    const params = new URLSearchParams(location.search);
+    const skip = params.get('skipintro') === '1';
+
+    const pre = document.getElementById('preloader');
+    const app = document.getElementById('app');
+    const logo = document.getElementById('logo');
+    const lang = document.getElementById('lang');
+    const hero = document.getElementById('hero');
+
+    function showApp(){
+      pre.style.opacity = '0';
+      setTimeout(()=>{ pre.style.display='none'; app.classList.add('show'); }, 400);
+    }
+
+    // Start: preloader 3s (lub natychmiast, jeśli skipintro)
+    if (skip) { showApp(); }
+    else { setTimeout(showApp, 3000); }
+
+    // Logo → language modal
+    function openLang(){ lang.classList.add('show'); }
+    logo.addEventListener('click', openLang);
+    logo.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openLang(); });
+
+    // Klik języka → pokaż hero
+    lang.addEventListener('click', (e)=>{
+      const btn = e.target.closest('[data-lang]');
+      if(!btn) return;
+      const chosen = btn.getAttribute('data-lang');
+      // tu możesz np. zapisać wybrany język do localStorage:
+      localStorage.setItem('evout_lang', chosen);
+      lang.classList.remove('show');
+      hero.classList.add('show');
+      // przewiń do hero (gładko)
+      hero.scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  </script>
 </body>
 </html>
