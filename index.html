@@ -5,105 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EVOUT</title>
   <style>
-    /* ===================================================
-       KONFIGURACJA (łatwe zmiany wyglądu)
-    =================================================== */
-    :root {
-      --bg: #000;
-      --fg: #fff;
+    /* =========================
+       KONFIGURACJA
+    ========================= */
+    :root{
+      --bg:#000;              /* tło ciemne */
+      --fg:#fff;              /* tekst ciemny */
+      --bg-light:#fff;        /* tło jasne */
+      --fg-light:#000;        /* tekst jasny */
 
-      /* swirl (intro) */
-      --swirl-color1: #8a2be2;     /* fiolet */
-      --swirl-color2: #00ff7f;     /* zieleń */
-      --swirl-speed: 2s;           /* czas obrotu */
-      --swirl-size: 280px;         /* max rozmiar */
-      
+      /* preloader (ring) */
+      --swirl-color1:#8a2be2;   /* fiolet */
+      --swirl-color2:#00ff7f;   /* zieleń */
+      --swirl-speed:1.6s;
+      --swirl-size:280px;
+
+      /* przejście motywu i scen */
+      --theme-fade:650ms;
+      --modal-fade:400ms;
+      --hero-fade:500ms;
+
       /* hero */
-      --hero-width-desktop: 70vw;  /* szerokość hero na desktopie */
-      --hero-width-max: 1100px;    /* maksymalna szerokość hero */
-      --hero-width-mobile: 92vw;
+      --hero-width-desktop:70vw;
+      --hero-width-max:1100px;
+      --hero-width-mobile:92vw;
     }
 
     html,body{
       height:100%; margin:0;
       background:var(--bg); color:var(--fg);
       font-family:Arial,Helvetica,sans-serif;
+      transition: background-color var(--theme-fade) ease, color var(--theme-fade) ease;
+    }
+    /* po przejściu na jasny motyw zmieniamy zmienne tylko dla body i potomków */
+    body.theme-light{
+      --bg:var(--bg-light);
+      --fg:var(--fg-light);
     }
 
-    /* ===== PRELOADER ===== */
+    /* ===== PRELOADER (clean energy ring) ===== */
     #preloader,#app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
     #preloader{background:var(--bg);transition:opacity .4s ease;z-index:100}
-
     .swirl{
       width:min(50vmin,var(--swirl-size));
       height:min(50vmin,var(--swirl-size));
+      position:relative;
+      filter:drop-shadow(0 0 18px color-mix(in oklab, var(--swirl-color2) 60%, white));
+    }
+    .swirl::before{
+      content:""; position:absolute; inset:0; border-radius:50%;
       background:conic-gradient(from 0deg, var(--swirl-color1), var(--swirl-color2), var(--swirl-color1));
-      -webkit-mask: radial-gradient(circle at center, transparent 44%, #000 45% 100%);
-              mask: radial-gradient(circle at center, transparent 44%, #000 45% 100%);
-      filter:blur(1px) drop-shadow(0 0 16px var(--swirl-color2));
-      animation: spin var(--swirl-speed) linear infinite, morph 4s ease-in-out infinite alternate;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* początkowo trójkąt */
+      animation:spin var(--swirl-speed) linear infinite;
+      -webkit-mask:radial-gradient(circle, #000 52%, transparent 53%);
+              mask:radial-gradient(circle, #000 52%, transparent 53%);
+    }
+    .swirl::after{
+      content:""; position:absolute; inset:0; border-radius:50%;
+      -webkit-mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);
+              mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);
+      background:#000;
+      animation:breathe 2.4s ease-in-out infinite alternate;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes morph{
-      0%{clip-path: polygon(50% 0%, 0% 100%, 100% 100%)}
-      50%{clip-path: circle(50% at 50% 50%)}
-      100%{clip-path: polygon(50% 0%, 0% 100%, 100% 100%)}
+    @keyframes breathe{
+      0%{ -webkit-mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);
+          mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);}
+      100%{ -webkit-mask:radial-gradient(circle, transparent 44%, #000 45% 55%, transparent 56%);
+            mask:radial-gradient(circle, transparent 44%, #000 45% 55%, transparent 56%);}
     }
 
-    /* ===== APP CONTAINER ===== */
+    /* ===== APP ===== */
     #app{opacity:0;pointer-events:none;transition:opacity .6s ease}
     #app.show{opacity:1;pointer-events:auto}
 
-    /* ===== LANDING LOGO ===== */
+    /* Landing logo */
     .logo{
-      margin:0;white-space:nowrap;line-height:1;font-weight:800;letter-spacing:.08em;
+      margin:0; white-space:nowrap; line-height:1; font-weight:800; letter-spacing:.08em;
       font-size:clamp(40px,20vw,16rem);
-      color:#fff;
-      opacity:0;transform:translateY(8px);
-      animation: fadeInUp .8s ease 60ms both,
-                 pulse 2.6s ease-in-out .9s infinite alternate;
-      cursor:pointer;outline:none;user-select:none;z-index:1;
-      text-shadow:0 0 12px rgba(255,255,255,.08);
+      color:var(--fg);
+      opacity:0; transform:translateY(8px);
+      animation:fadeInUp .8s ease 60ms both, pulse 2.6s ease-in-out .9s infinite alternate;
+      cursor:pointer; outline:none; user-select:none; z-index:1;
+      text-shadow:0 0 12px rgba(0,0,0,.08);
       position:relative;
+      transition: color var(--theme-fade) ease;
     }
     @keyframes fadeInUp{to{opacity:1;transform:none}}
     @keyframes pulse{to{transform:scale(1.035)}}
     @keyframes fadeOutUp{to{opacity:0;transform:translateY(-6px)}}
-    .logo.fadeout{animation: fadeOutUp .25s ease forwards}
+    .logo.fadeout{animation:fadeOutUp .25s ease forwards}
 
-    /* ===== LANGUAGE MODAL ===== */
-    #lang{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:saturate(120%) blur(2px);z-index:10}
-    #lang.show{display:grid}
-    .card{padding:24px 22px;border-radius:18px;background:#0b0b0b;box-shadow:0 10px 30px rgba(0,0,0,.5);min-width:min(92vw,480px);text-align:center}
-    .row{
-      display:flex;flex-direction:column;gap:12px;align-items:stretch;margin-top:14px
+    /* Language modal */
+    #lang{
+      position:fixed; inset:0; display:none; place-items:center;
+      background:rgba(0,0,0,.6); backdrop-filter:saturate(120%) blur(2px);
+      z-index:10; opacity:0; transition:opacity var(--modal-fade) ease;
     }
+    #lang.show{ display:grid; opacity:1; }
+    #lang.fadeout{ opacity:0; } /* płynne znikanie */
+
+    .card{
+      padding:24px 22px; border-radius:18px; background:#0b0b0b;
+      box-shadow:0 10px 30px rgba(0,0,0,.5);
+      min-width:min(92vw,480px); text-align:center;
+      transition: background-color var(--theme-fade) ease, color var(--theme-fade) ease;
+      color:#fff;
+    }
+    /* aby na jasnym motywie całość spójnie zbladła */
+    body.theme-light #lang .card{ background:#f4f4f4; color:#000; }
+
+    .row{ display:flex; flex-direction:column; gap:12px; align-items:stretch; margin-top:14px }
     .btn{
-      padding:12px 16px;border-radius:12px;background:#111;color:#fff;border:1px solid #222;
-      font-weight:700;letter-spacing:.04em;cursor:pointer
+      padding:12px 16px; border-radius:12px; background:#111; color:#fff;
+      border:1px solid #222; font-weight:700; letter-spacing:.04em; cursor:pointer;
+      transition: background-color .2s ease, color .2s ease, border-color .2s ease;
     }
-    .btn:hover{border-color:#444}
+    .btn:hover{ border-color:#444 }
+    body.theme-light .btn{ background:#fff; color:#000; border-color:#d9d9d9 }
+    body.theme-light .btn:hover{ border-color:#bbb }
 
-    /* ===== HERO ===== */
-    #hero{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px}
-    #hero.show{display:grid}
-    .hero-wrap{
-      width:min(var(--hero-width-desktop), var(--hero-width-max));
-      margin:0 auto
-    }
-    @media (max-width: 900px){
-      .hero-wrap{width:var(--hero-width-mobile)}
-    }
-    .hero-title{margin:0 0 .3em;font-weight:800;letter-spacing:.04em;line-height:1;font-size:clamp(48px,12vw,140px)}
-    .hero-tagline{margin:.1em 0 .35em;opacity:.9;font-weight:600;font-size:clamp(16px,3.2vw,28px)}
-    .hero-soon{margin:0;opacity:.75;letter-spacing:.08em;text-transform:uppercase;font-size:clamp(12px,2.2vw,16px)}
+    /* Hero */
+    #hero{ position:absolute; inset:0; display:none; place-items:center; text-align:center; padding:24px; opacity:0; transition:opacity var(--hero-fade) ease }
+    #hero.show{ display:grid; }
+    #hero.visible{ opacity:1; }
 
-    /* ===== REDUCED MOTION ===== */
-    @media (prefers-reduced-motion: reduce){
+    .hero-wrap{ width:min(var(--hero-width-desktop), var(--hero-width-max)); margin:0 auto }
+    @media (max-width:900px){ .hero-wrap{ width:var(--hero-width-mobile) } }
+
+    .hero-title{ margin:0 0 .3em; font-weight:800; letter-spacing:.04em; line-height:1; font-size:clamp(48px,12vw,140px) }
+    .hero-tagline{ margin:.1em 0 .35em; opacity:.9; font-weight:600; font-size:clamp(16px,3.2vw,28px) }
+    .hero-soon{ margin:0; opacity:.75; letter-spacing:.08em; text-transform:uppercase; font-size:clamp(12px,2.2vw,16px) }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion:reduce){
       .swirl{animation:none}
       .logo{animation:none;opacity:1;transform:none}
       #preloader,#app{transition:none}
+      #lang{transition:none}
+      #hero{transition:none}
+      html,body{transition:none}
     }
   </style>
 </head>
@@ -117,10 +157,10 @@
   <div id="app" role="main" aria-live="polite">
     <h1 class="logo" id="logo" tabindex="0" role="button" aria-label="Wejdź do EVOUT">EVOUT</h1>
 
-    <!-- LANGUAGE CHOOSER -->
+    <!-- LANGUAGE -->
     <div id="lang" aria-modal="true" role="dialog" aria-label="Wybór języka">
       <div class="card">
-        <h3>Wybierz język / Choose language</h3>
+        <h3>Choose language</h3>
         <div class="row">
           <button class="btn" data-lang="en">English</button>
           <button class="btn" data-lang="de">Deutsch</button>
@@ -140,6 +180,7 @@
   </div>
 
   <script>
+    // Dev: ?skipintro=1
     const params = new URLSearchParams(location.search);
     const skip = params.get('skipintro') === '1';
 
@@ -152,9 +193,9 @@
     const soon = document.getElementById('soon');
 
     const i18n = {
-      en: { tagline: "Marketing & IT solutions for your business", soon: "Coming soon" },
-      de: { tagline: "Marketing- und IT-Lösungen für Ihr Unternehmen", soon: "Bald verfügbar" },
-      pl: { tagline: "Marketing i rozwiązania IT dla Twojej firmy", soon: "Już wkrótce" }
+      en:{ tagline:"Marketing & IT solutions for your business", soon:"Coming soon" },
+      de:{ tagline:"Marketing- und IT-Lösungen für Ihr Unternehmen", soon:"Bald verfügbar" },
+      pl:{ tagline:"Marketing i rozwiązania IT dla Twojej firmy", soon:"Już wkrótce" }
     };
 
     function applyLang(code){
@@ -178,15 +219,28 @@
     logo.addEventListener('click', openLang);
     logo.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') openLang(); });
 
+    // Click language -> smooth transition:
     lang.addEventListener('click', (e)=>{
       const btn = e.target.closest('[data-lang]');
       if(!btn) return;
+
       const chosen = btn.getAttribute('data-lang');
       localStorage.setItem('evout_lang', chosen);
       applyLang(chosen);
-      lang.classList.remove('show');
-      hero.classList.add('show');
-      hero.scrollIntoView({behavior:'smooth', block:'center'});
+
+      // 1) zacznij wygaszanie modala
+      lang.classList.add('fadeout');
+
+      // 2) w tym samym czasie przełącz motyw do jasnego (płynna zmiana tła i koloru)
+      document.body.classList.add('theme-light');
+
+      // 3) po zakończeniu fadeout modala — ukryj go, pokaż hero, potem fade-in hero
+      setTimeout(()=>{
+        lang.classList.remove('show','fadeout');
+        hero.classList.add('show');
+        // opóźnij minimalnie, by CSS transition mogło złapać stan początkowy
+        requestAnimationFrame(()=> hero.classList.add('visible'));
+      }, parseInt(getComputedStyle(lang).transitionDuration) * 1000 || 400);
     });
 
     const remembered = localStorage.getItem('evout_lang');
