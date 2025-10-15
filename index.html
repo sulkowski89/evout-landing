@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -173,8 +173,8 @@
     <section id="hero">
       <div class="hero-wrap">
         <h1 class="hero-title">EVOUT</h1>
-        <p class="hero-tagline" id="tagline">Marketing i rozwiązania IT dla Twojej firmy</p>
-        <p class="hero-soon" id="soon">Już wkrótce</p>
+        <p class="hero-tagline" id="tagline">Marketing & IT solutions for your business</p>
+        <p class="hero-soon" id="soon">Coming soon</p>
       </div>
     </section>
   </div>
@@ -199,7 +199,7 @@
     };
 
     function applyLang(code){
-      const dict = i18n[code] || i18n.pl;
+      const dict = i18n[code] || i18n.en;
       tagline.textContent = dict.tagline;
       soon.textContent = dict.soon;
       document.documentElement.lang = code;
@@ -248,3 +248,4 @@
   </script>
 </body>
 </html>
+
