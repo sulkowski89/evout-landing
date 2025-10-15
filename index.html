@@ -44,36 +44,77 @@
     }
 
     /* ===== PRELOADER (clean energy ring) ===== */
-    #preloader,#app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-    #preloader{background:var(--bg);transition:opacity .4s ease;z-index:100}
-    .swirl{
-      width:min(50vmin,var(--swirl-size));
-      height:min(50vmin,var(--swirl-size));
-      position:relative;
-      filter:drop-shadow(0 0 18px color-mix(in oklab, var(--swirl-color2) 60%, white));
-    }
-    .swirl::before{
-      content:""; position:absolute; inset:0; border-radius:50%;
-      background:conic-gradient(from 0deg, var(--swirl-color1), var(--swirl-color2), var(--swirl-color1));
-      animation:spin var(--swirl-speed) linear infinite;
-      -webkit-mask:radial-gradient(circle, #000 52%, transparent 53%);
-              mask:radial-gradient(circle, #000 52%, transparent 53%);
-    }
-    .swirl::after{
-      content:""; position:absolute; inset:0; border-radius:50%;
-      -webkit-mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);
-              mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);
-      background:#000;
-      animation:breathe 2.4s ease-in-out infinite alternate;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes breathe{
-      0%{ -webkit-mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);
-          mask:radial-gradient(circle, transparent 46%, #000 47% 53%, transparent 54%);}
-      100%{ -webkit-mask:radial-gradient(circle, transparent 44%, #000 45% 55%, transparent 56%);
-            mask:radial-gradient(circle, transparent 44%, #000 45% 55%, transparent 56%);}
-    }
+/* ===== PRELOADER (clean energy ring — v3, bez „skoku”) ===== */
+/* 1) Rejestrujemy animowalną zmienną — promień WEWNĘTRZNY ringu.
+   Zmieniamy tylko JEDNĄ wartość, więc nie ma desynchronizacji warstw. */
+@property --inner {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 48%;
+}
 
+/* 2) Kontener preloadera jak wcześniej */
+#preloader, #app {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#preloader {
+  background: var(--bg);
+  transition: opacity .4s ease;
+  z-index: 100;
+}
+
+/* 3) Sam ring – jedna warstwa (::before), bez ::after */
+.swirl {
+  width: min(50vmin, var(--swirl-size));
+  height: min(50vmin, var(--swirl-size));
+  position: relative;
+  /* delikatny blask w kolorze zieleni */
+  filter: drop-shadow(0 0 18px color-mix(in oklab, var(--swirl-color2) 60%, white));
+}
+
+/* 4) Warstwa ringu: kolorowy CONIC + maska RADIAL sterowana --inner */
+.swirl::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 50%;
+
+  /* kolor: płynny fiolet ↔ zieleń, obracany w czasie */
+  background: conic-gradient(from 0deg,
+    var(--swirl-color1),
+    var(--swirl-color2),
+    var(--swirl-color1)
+  );
+
+  /* Maska tworzy PIERŚCIEŃ: od środka do --inner jest „pełne”,
+     między --inner a (--inner + 2%) jest „dziura”, co daje grubość ringu ≈ 2% */
+  -webkit-mask: radial-gradient(circle,
+    #000 var(--inner),
+    transparent calc(var(--inner) + 2%)
+  );
+          mask: radial-gradient(circle,
+    #000 var(--inner),
+    transparent calc(var(--inner) + 2%)
+  );
+
+  /* Dwie animacje NARAZ: obrót + „oddech” grubości (zmieniamy --inner).
+     Brak przeskoku, bo od 1. klatki obowiązuje ta sama maska i ta sama zmienna. */
+  animation:
+    spin var(--swirl-speed) linear infinite,
+    breathe 2.4s ease-in-out infinite alternate;
+}
+
+/* 5) Obrót ringu */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 6) „Oddech” – płynnie zwężamy/poszerzamy ring jedną zmienną */
+@keyframes breathe {
+  from { --inner: 48%; }  /* startowa grubość (stały wygląd od 1. klatki) */
+  to   { --inner: 45%; }  /* minimalnie grubszy ring na szczycie animacji */
+}
+    
     /* ===== APP ===== */
     #app{opacity:0;pointer-events:none;transition:opacity .6s ease}
     #app.show{opacity:1;pointer-events:auto}
@@ -248,4 +289,5 @@
   </script>
 </body>
 </html>
+
 
