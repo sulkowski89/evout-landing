@@ -5,21 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EVOUT</title>
   <style>
-    :root { --bg:#000; --fg:#fff; }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Arial,Helvetica,sans-serif}
+    /* ===================================================
+       KONFIGURACJA (łatwe zmiany wyglądu)
+    =================================================== */
+    :root {
+      --bg: #000;
+      --fg: #fff;
+
+      /* swirl (intro) */
+      --swirl-color1: #8a2be2;     /* fiolet */
+      --swirl-color2: #00ff7f;     /* zieleń */
+      --swirl-speed: 2s;           /* czas obrotu */
+      --swirl-size: 280px;         /* max rozmiar */
+      
+      /* hero */
+      --hero-width-desktop: 70vw;  /* szerokość hero na desktopie */
+      --hero-width-max: 1100px;    /* maksymalna szerokość hero */
+      --hero-width-mobile: 92vw;
+    }
+
+    html,body{
+      height:100%; margin:0;
+      background:var(--bg); color:var(--fg);
+      font-family:Arial,Helvetica,sans-serif;
+    }
 
     /* ===== PRELOADER ===== */
     #preloader,#app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-    #preloader{background:#000;transition:opacity .4s ease;z-index:100}
+    #preloader{background:var(--bg);transition:opacity .4s ease;z-index:100}
+
     .swirl{
-      width:min(50vmin,280px);height:min(50vmin,280px);border-radius:50%;
-      background:conic-gradient(from 0deg,#4af,#0ff,#8f8,#4af);
-      -webkit-mask:radial-gradient(circle at center,transparent 44%,#000 45% 100%);
-              mask:radial-gradient(circle at center,transparent 44%,#000 45% 100%);
-      filter:blur(1px) drop-shadow(0 0 16px #0ff);
-      animation:spin 1.2s linear infinite
+      width:min(50vmin,var(--swirl-size));
+      height:min(50vmin,var(--swirl-size));
+      background:conic-gradient(from 0deg, var(--swirl-color1), var(--swirl-color2), var(--swirl-color1));
+      -webkit-mask: radial-gradient(circle at center, transparent 44%, #000 45% 100%);
+              mask: radial-gradient(circle at center, transparent 44%, #000 45% 100%);
+      filter:blur(1px) drop-shadow(0 0 16px var(--swirl-color2));
+      animation: spin var(--swirl-speed) linear infinite, morph 4s ease-in-out infinite alternate;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* początkowo trójkąt */
     }
     @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes morph{
+      0%{clip-path: polygon(50% 0%, 0% 100%, 100% 100%)}
+      50%{clip-path: circle(50% at 50% 50%)}
+      100%{clip-path: polygon(50% 0%, 0% 100%, 100% 100%)}
+    }
 
     /* ===== APP CONTAINER ===== */
     #app{opacity:0;pointer-events:none;transition:opacity .6s ease}
@@ -58,9 +88,12 @@
     /* ===== HERO ===== */
     #hero{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px}
     #hero.show{display:grid}
-    .hero-wrap{width:min(60vw,1100px);margin:0 auto}
+    .hero-wrap{
+      width:min(var(--hero-width-desktop), var(--hero-width-max));
+      margin:0 auto
+    }
     @media (max-width: 900px){
-      .hero-wrap{width:92vw}
+      .hero-wrap{width:var(--hero-width-mobile)}
     }
     .hero-title{margin:0 0 .3em;font-weight:800;letter-spacing:.04em;line-height:1;font-size:clamp(48px,12vw,140px)}
     .hero-tagline{margin:.1em 0 .35em;opacity:.9;font-weight:600;font-size:clamp(16px,3.2vw,28px)}
@@ -107,7 +140,6 @@
   </div>
 
   <script>
-    // ?skipintro=1 to bypass preloader during dev
     const params = new URLSearchParams(location.search);
     const skip = params.get('skipintro') === '1';
 
@@ -120,18 +152,9 @@
     const soon = document.getElementById('soon');
 
     const i18n = {
-      en: {
-        tagline: "Marketing & IT solutions for your business",
-        soon: "Coming soon"
-      },
-      de: {
-        tagline: "Marketing- und IT-Lösungen für Ihr Unternehmen",
-        soon: "Bald verfügbar"
-      },
-      pl: {
-        tagline: "Marketing i rozwiązania IT dla Twojej firmy",
-        soon: "Już wkrótce"
-      }
+      en: { tagline: "Marketing & IT solutions for your business", soon: "Coming soon" },
+      de: { tagline: "Marketing- und IT-Lösungen für Ihr Unternehmen", soon: "Bald verfügbar" },
+      pl: { tagline: "Marketing i rozwiązania IT dla Twojej firmy", soon: "Już wkrótce" }
     };
 
     function applyLang(code){
@@ -146,18 +169,15 @@
       setTimeout(()=>{ pre.style.display='none'; app.classList.add('show'); }, 400);
     }
 
-    // Start: preloader 3s (or skip for dev)
     if (skip) { showApp(); } else { setTimeout(showApp, 3000); }
 
-    // Open language modal → fade out logo
     function openLang(){
-      logo.classList.add('fadeout');   // ukryj logo
+      logo.classList.add('fadeout');
       setTimeout(()=>{ lang.classList.add('show'); }, 120);
     }
     logo.addEventListener('click', openLang);
     logo.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') openLang(); });
 
-    // Choose language → apply i18n → show hero
     lang.addEventListener('click', (e)=>{
       const btn = e.target.closest('[data-lang]');
       if(!btn) return;
@@ -169,7 +189,6 @@
       hero.scrollIntoView({behavior:'smooth', block:'center'});
     });
 
-    // If language remembered, apply it (but logo i modal pokaż normalnie)
     const remembered = localStorage.getItem('evout_lang');
     if (remembered) applyLang(remembered);
   </script>
