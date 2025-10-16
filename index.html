@@ -31,26 +31,26 @@
       }
       .cosmic-line { animation-name: rise; animation-timing-function: cubic-bezier(.2,.8,.2,1); animation-iteration-count: infinite; will-change: transform; }
 
-      /* EVOUT drift to ~middle over full intro time */
+      /* EVOUT drift to ~middle over full intro time (start niżej, koniec wyżej) */
       @keyframes driftUp {
-        0%   { transform: translateY(35vh) scale(.985); opacity: .95; }
-        100% { transform: translateY(-10vh) scale(1);   opacity: 1; }
+        0%   { transform: translateY(45vh) scale(.985); opacity: .95; }
+        100% { transform: translateY(-20vh) scale(1);   opacity: 1; }
       }
       .evout-drift { animation: driftUp var(--intro-ms) ease-in-out both; }
 
-      /* Subtle pulse (while intro runs) */
+      /* Subtle pulse during intro */
       @keyframes pulseSoft { 0% { transform: scale(.985); opacity:.95; } 50% { transform: scale(1); opacity:1; } 100% { transform: scale(.985); opacity:.95; } }
       .evout-pulse { animation: pulseSoft 2.8s ease-in-out infinite; }
 
-      /* On click: slide EVOUT up and then fade out overlay */
+      /* On click: slide EVOUT up, fade out overlay */
       @keyframes slideUpAway { from { transform: translateY(0); } to { transform: translateY(-120%); } }
       .slide-up { animation: slideUpAway var(--slide-up-ms) cubic-bezier(.2,.8,.2,1) both; }
       @keyframes fadeOut { to { opacity: 0; } }
       .intro-fade { animation: fadeOut var(--fade-ms) ease forwards; }
 
-      /* Accordions */
-      .panel { max-height: 0; overflow: hidden; transition: max-height 500ms ease; }
-      .panel.open { max-height: var(--h, 1000px); }
+      /* Accordions: animate height (not max-height) */
+      .panel { height: 0; overflow: hidden; transition: height 400ms ease; }
+      .panel--auto { height: auto; } /* applied after expand transition */
     </style>
 
     <script>
@@ -213,7 +213,7 @@
     <!-- MAIN -->
     <main id="main">
       <!-- HERO -->
-      <section id="hero" class="relative overflow-hidden">
+      <section id="hero" class="relative">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <header class="max-w-3xl">
             <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight" data-i18n="hero.h1">Business success — let’s split it into parts.</h1>
@@ -426,6 +426,7 @@
       </section>
     </main>
 
+    <!-- FOOTER -->
     <footer class="border-t border-white/10 py-10">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm">&copy; <span id="year"></span> EVOUT</p>
@@ -447,7 +448,7 @@
         const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         // Year
-        $('#year')?.append(new Date().getFullYear());
+        const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
 
         // ===== i18n =====
         const langSelect = $('#lang');
@@ -459,13 +460,13 @@
             let cur = d; for (const p of path) cur = cur?.[p];
             if (typeof cur === 'string') el.textContent = cur;
           });
-          $('#skipIntro') && ($('#skipIntro').textContent = d.skipIntro || 'Skip intro');
+          const skip = $('#skipIntro'); if (skip) skip.textContent = d.skipIntro || 'Skip intro';
           setDir(code);
         };
         const persistLang = (c) => { try { localStorage.setItem('lang', c); } catch {} };
         const readLang = () => { try { return new URL(location.href).searchParams.get('lang') || localStorage.getItem('lang') || APP_CONFIG.DEFAULT_LANG; } catch { return APP_CONFIG.DEFAULT_LANG; } };
-        const initialLang = readLang(); langSelect.value = initialLang; applyI18n(initialLang);
-        langSelect.addEventListener('change', () => { const c = langSelect.value; persistLang(c); applyI18n(c); });
+        const initialLang = readLang(); if (langSelect) langSelect.value = initialLang; applyI18n(initialLang);
+        langSelect?.addEventListener('change', () => { const c = langSelect.value; persistLang(c); applyI18n(c); });
 
         // ===== Intro SVG =====
         const linesG = $('#lines');
@@ -489,7 +490,6 @@
 
         // ===== Intro flow =====
         const intro = $('#intro'), evoutWrap = $('#evoutWrap'), evoutBtn = $('#evoutBtn'), skipBtn = $('#skipIntro'), HERO = $('#hero');
-        // durations to CSS vars
         document.documentElement.style.setProperty('--intro-ms', (prefersReduced ? 300 : APP_CONFIG.INTRO_MS)+'ms');
         document.documentElement.style.setProperty('--slide-up-ms', (prefersReduced ? 0 : APP_CONFIG.SLIDE_UP_MS)+'ms');
         document.documentElement.style.setProperty('--fade-ms', (prefersReduced ? 200 : APP_CONFIG.FADE_MS)+'ms');
@@ -527,41 +527,52 @@
           if (!branchesWrap.classList.contains('hidden')) branchesWrap.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
         });
 
-        // ===== Accordions: toggle +/– and auto-height recalculation (including ancestors) =====
-        function toggleBtn(btn) {
-          const panel = document.getElementById(btn.getAttribute('aria-controls'));
-          const expanded = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', String(!expanded));
-          const pm = btn.querySelector('.pm'); if (pm) pm.textContent = expanded ? '+' : '–';
-          if (!panel) return;
-          if (!expanded) { openPanel(panel); } else { closePanel(panel); }
-          recalcAncestors(panel);
+        // ===== Accordions (height animation + plus/minus) =====
+        function setPm(btn, open) {
+          const pm = btn.querySelector('.pm');
+          if (pm) pm.textContent = open ? '–' : '+';
         }
         function openPanel(panel) {
-          panel.classList.add('open');
-          panel.style.setProperty('--h', panel.scrollHeight + 'px');
+          if (panel.classList.contains('panel--auto')) return;
+          const start = panel.getBoundingClientRect().height;
+          panel.style.height = start + 'px';
+          panel.getBoundingClientRect(); // reflow
+          const target = panel.scrollHeight;
+          panel.style.height = target + 'px';
+          const onEnd = (e) => {
+            if (e.propertyName !== 'height') return;
+            panel.removeEventListener('transitionend', onEnd);
+            panel.style.height = '';
+            panel.classList.add('panel--auto');
+          };
+          panel.addEventListener('transitionend', onEnd, { once: true });
         }
         function closePanel(panel) {
-          panel.style.setProperty('--h', panel.scrollHeight + 'px'); void panel.offsetHeight;
-          panel.classList.remove('open');
-        }
-        function recalcAncestors(el) {
-          let p = el?.parentElement;
-          while (p) {
-            if (p.classList?.contains('panel') && p.classList?.contains('open')) {
-              p.style.setProperty('--h', p.scrollHeight + 'px');
-            }
-            p = p.parentElement;
+          if (panel.classList.contains('panel--auto')) {
+            panel.classList.remove('panel--auto');
+            const h = panel.scrollHeight;
+            panel.style.height = h + 'px';
+            panel.getBoundingClientRect(); // reflow
           }
+          panel.style.height = '0px';
+        }
+        function toggleBtn(btn) {
+          const panel = document.getElementById(btn.getAttribute('aria-controls'));
+          if (!panel) return;
+          const open = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!open));
+          setPm(btn, !open);
+          if (!open) openPanel(panel); else closePanel(panel);
         }
         function bindAccordion(selector) {
           $$(selector).forEach(btn => {
-            btn.addEventListener('click', ()=>toggleBtn(btn));
-            btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' ') { e.preventDefault(); toggleBtn(btn); } });
+            btn.addEventListener('click', () => toggleBtn(btn));
+            btn.addEventListener('keydown', (e) => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); toggleBtn(btn); } });
           });
         }
-        bindAccordion('.branch-btn'); bindAccordion('.sub-branch-btn'); bindAccordion('.leaf-btn');
-        window.addEventListener('resize', () => { $$('.panel.open').forEach(p => p.style.setProperty('--h', p.scrollHeight + 'px')); });
+        bindAccordion('.branch-btn');
+        bindAccordion('.sub-branch-btn');
+        bindAccordion('.leaf-btn');
 
         // ===== Contact form (Coming soon) =====
         const form = document.querySelector('form'); const status = $('#formStatus');
