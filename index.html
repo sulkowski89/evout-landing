@@ -12,99 +12,66 @@
     <script>
       tailwind.config = {
         darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: [
-                '-apple-system','BlinkMacSystemFont','Segoe UI','Inter','Roboto','Helvetica','Arial','sans-serif'
-              ],
-            },
-          }
-        }
+        theme: { extend: { fontFamily: { sans: ['-apple-system','BlinkMacSystemFont','Segoe UI','Inter','Roboto','Helvetica','Arial','sans-serif'] } } }
       };
     </script>
 
     <style>
-      :root { --ring: 3px; }
+      :root { --ring: 3px; --intro-ms: 5000ms; --slide-up-ms: 700ms; --fade-ms: 500ms; }
       :focus-visible { outline: var(--ring) solid rgba(255,255,255,0.6); outline-offset: 2px; }
       @media (prefers-reduced-motion: reduce) {
-        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+        * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+        :root { --intro-ms: 300ms; --slide-up-ms: 0ms; --fade-ms: 200ms; }
       }
 
-      /* Preloader: lines/dots rising slowly */
+      /* Preloader lines/dots */
       @keyframes rise {
-        0% { transform: translateY(110vh); opacity: 0.8; }
-        100% { transform: translateY(-120vh); opacity: 0.8; }
+        0% { transform: translateY(110vh); opacity: .8; }
+        100% { transform: translateY(-120vh); opacity: .8; }
       }
-      .cosmic-line {
-        animation-name: rise;
-        animation-timing-function: cubic-bezier(.2,.8,.2,1);
-        animation-iteration-count: infinite;
-        will-change: transform;
-      }
+      .cosmic-line { animation-name: rise; animation-timing-function: cubic-bezier(.2,.8,.2,1); animation-iteration-count: infinite; will-change: transform; }
 
-      /* EVOUT gentle drift during intro (takes full intro time) */
+      /* EVOUT drift to ~middle over full intro time */
       @keyframes driftUp {
-        0%   { transform: translateY(15vh) scale(0.985); opacity: 0.95; }
-        100% { transform: translateY(-10vh) scale(1);     opacity: 1; }
+        0%   { transform: translateY(35vh) scale(.985); opacity: .95; }
+        100% { transform: translateY(-10vh) scale(1);   opacity: 1; }
       }
-      .evout-drift { animation: driftUp var(--intro-ms,5000ms) ease-in-out both; }
+      .evout-drift { animation: driftUp var(--intro-ms) ease-in-out both; }
 
-      /* EVOUT pulsation (subtle) */
-      @keyframes pulseSoft {
-        0% { transform: scale(0.985); opacity: 0.95; }
-        50% { transform: scale(1.0); opacity: 1; }
-        100% { transform: scale(0.985); opacity: 0.95; }
-      }
+      /* Subtle pulse (while intro runs) */
+      @keyframes pulseSoft { 0% { transform: scale(.985); opacity:.95; } 50% { transform: scale(1); opacity:1; } 100% { transform: scale(.985); opacity:.95; } }
       .evout-pulse { animation: pulseSoft 2.8s ease-in-out infinite; }
 
-      /* Slide up fast on click */
-      @keyframes slideUpAway {
-        0% { transform: translateY(0); }
-        100% { transform: translateY(-120%); }
-      }
-      .slide-up { animation: slideUpAway var(--slide-up-ms,700ms) cubic-bezier(.2,.8,.2,1) both; }
+      /* On click: slide EVOUT up and then fade out overlay */
+      @keyframes slideUpAway { from { transform: translateY(0); } to { transform: translateY(-120%); } }
+      .slide-up { animation: slideUpAway var(--slide-up-ms) cubic-bezier(.2,.8,.2,1) both; }
+      @keyframes fadeOut { to { opacity: 0; } }
+      .intro-fade { animation: fadeOut var(--fade-ms) ease forwards; }
 
-      /* Nested accordion transitions */
+      /* Accordions */
       .panel { max-height: 0; overflow: hidden; transition: max-height 500ms ease; }
       .panel.open { max-height: var(--h, 1000px); }
     </style>
 
     <script>
-      // ====== CONFIG ======
-      const APP_CONFIG = {
-        INTRO_MS: 5000,          // total intro duration (preloader)
-        SLIDE_UP_MS: 700,        // EVOUT slide-up on click
-        PULSE: true,             // EVOUT pulsation during intro
-        DEFAULT_LANG: 'en',      // en | de | pl | ru | ar
-        DOTS: 12,                // number of moving lines
-      };
+      // ===== CONFIG =====
+      const APP_CONFIG = { INTRO_MS: 5000, SLIDE_UP_MS: 700, FADE_MS: 500, PULSE: true, DEFAULT_LANG: 'en', DOTS: 12 };
 
-      // i18n dictionary
+      // ===== i18n =====
       const I18N = {
         en: {
-          langName: "English",
           skipIntro: "Skip intro",
           nav: { services:"Services", pricing:"Pricing", contact:"Contact" },
           hero: {
             h1: "Business success — let’s split it into parts.",
             lead: "From marketing and digitalization to growth strategy — we blend aesthetics, technology, and results.",
-            primaryCta: "Let’s talk",
-            explore: "Explore"
+            primaryCta: "Let’s talk", explore: "Explore"
           },
           branches: {
             root: "Business success",
-            a: { title: "Marketing",
-              a1:"Werbetechnik (offline)",
-              a2:"Digital media",
-              dm: {
-                gmb:"Google Business (reviews & profile)",
-                social:"Social media (posts & comments)",
-                email:"Email marketing",
-                video:"Promotional video",
-                photo:"Business photoshoot"
-              }
-            },
+            dive: "Dive deeper",
+            a: { title: "Marketing", a1:"Werbetechnik (offline)", a2:"Digital media",
+              dm: { gmb:"Google Business (reviews & profile)", social:"Social media (posts & comments)", email:"Email marketing", video:"Promotional video", photo:"Business photoshoot" } },
             b: { title: "Digitalization", b1:"Websites", b2:"SEO", b3:"AI Agent", b4:"Automations", b5:"Applications" },
             c: { title: "Strategy & Growth", c1:"Positioning", c2:"CRO & Analytics", c3:"Go-to-market" },
             more: "See details"
@@ -117,232 +84,116 @@
             custom:  { title:"Custom",  p1:"Bespoke scope", p2:"Integrations", p3:"Ongoing support", price:"on request" },
             cta: "Choose plan"
           },
-          contact: {
-            title:"Contact",
-            name:"Name",
-            email:"Email",
-            message:"Project details",
-            submit:"Send",
-            thanks:"Coming soon — email setup in progress. Your message was not sent."
-          },
+          contact: { title:"Contact", name:"Name", email:"Email", message:"Project details", submit:"Send", thanks:"Coming soon — email setup in progress. Your message was not sent." },
           footer: { privacy:"Privacy", terms:"Terms", email:"hello@evout.com" }
         },
         de: {
-          langName: "Deutsch",
-          skipIntro: "Intro überspringen",
-          nav: { services:"Leistungen", pricing:"Pakete", contact:"Kontakt" },
-          hero: {
-            h1: "Geschäftserfolg — wir zerlegen ihn in Bausteine.",
-            lead: "Von Marketing und Digitalisierung bis Wachstumsstrategie — Ästhetik, Technologie und Ergebnisse.",
-            primaryCta: "Lass uns sprechen",
-            explore: "Entdecken"
+          skipIntro:"Intro überspringen",
+          nav:{services:"Leistungen",pricing:"Pakete",contact:"Kontakt"},
+          hero:{h1:"Geschäftserfolg — wir zerlegen ihn in Bausteine.",lead:"Von Marketing und Digitalisierung bis Wachstumsstrategie — Ästhetik, Technologie und Ergebnisse.",primaryCta:"Lass uns sprechen",explore:"Entdecken"},
+          branches:{
+            root:"Geschäftserfolg", dive:"Mehr erfahren",
+            a:{title:"Marketing",a1:"Werbetechnik (offline)",a2:"Digitale Medien",
+              dm:{gmb:"Google Business (Bewertungen & Profil)",social:"Social Media (Posts & Kommentare)",email:"E-Mail-Marketing",video:"Werbevideo",photo:"Business-Fotoshooting"}},
+            b:{title:"Digitalisierung",b1:"Websites",b2:"SEO",b3:"KI-Agent",b4:"Automatisierungen",b5:"Applikationen"},
+            c:{title:"Strategie & Wachstum",c1:"Positionierung",c2:"CRO & Analytics",c3:"Go-to-Market"},
+            more:"Details ansehen"
           },
-          branches: {
-            root: "Geschäftserfolg",
-            a: { title: "Marketing",
-              a1:"Werbetechnik (offline)",
-              a2:"Digitale Medien",
-              dm: {
-                gmb:"Google Business (Bewertungen & Profil)",
-                social:"Social Media (Posts & Kommentare)",
-                email:"E-Mail-Marketing",
-                video:"Werbevideo",
-                photo:"Business-Fotoshooting"
-              }
-            },
-            b: { title: "Digitalisierung", b1:"Websites", b2:"SEO", b3:"KI-Agent", b4:"Automatisierungen", b5:"Applikationen" },
-            c: { title: "Strategie & Wachstum", c1:"Positionierung", c2:"CRO & Analytics", c3:"Go-to-Market" },
-            more: "Details ansehen"
+          services:{title:"Leistungen"},
+          pricing:{title:"Pakete",
+            starter:{title:"Starter",p1:"Landingpage",p2:"Basis-SEO",p3:"Analytics-Setup",price:"ab €990"},
+            growth:{title:"Growth",p1:"Website (bis 8 Seiten)",p2:"SEO + Content-Plan",p3:"Prozessautomatisierungen",price:"ab €3.900"},
+            custom:{title:"Custom",p1:"Individuelles Paket",p2:"Integrationen",p3:"Laufende Betreuung",price:"auf Anfrage"},
+            cta:"Paket wählen"
           },
-          services: { title: "Leistungen" },
-          pricing: {
-            title: "Pakete",
-            starter: { title:"Starter", p1:"Landingpage", p2:"Basis-SEO", p3:"Analytics-Setup", price:"ab €990" },
-            growth:  { title:"Growth",  p1:"Website (bis 8 Seiten)", p2:"SEO + Content-Plan", p3:"Prozessautomatisierungen", price:"ab €3.900" },
-            custom:  { title:"Custom",  p1:"Individuelles Paket", p2:"Integrationen", p3:"Laufende Betreuung", price:"auf Anfrage" },
-            cta: "Paket wählen"
-          },
-          contact: {
-            title:"Kontakt",
-            name:"Name",
-            email:"E-Mail",
-            message:"Projektdetails",
-            submit:"Senden",
-            thanks:"Bald verfügbar — E-Mail wird eingerichtet. Ihre Nachricht wurde nicht gesendet."
-          },
-          footer: { privacy:"Datenschutz", terms:"AGB", email:"hello@evout.com" }
+          contact:{title:"Kontakt",name:"Name",email:"E-Mail",message:"Projektdetails",submit:"Senden",thanks:"Bald verfügbar — E-Mail wird eingerichtet. Ihre Nachricht wurde nicht gesendet."},
+          footer:{privacy:"Datenschutz",terms:"AGB",email:"hello@evout.com"}
         },
         pl: {
-          langName: "Polski",
-          skipIntro: "Pomiń intro",
-          nav: { services:"Usługi", pricing:"Pakiety", contact:"Kontakt" },
-          hero: {
-            h1: "Sukces biznesu — rozłóżmy go na czynniki pierwsze.",
-            lead: "Od marketingu i digitalizacji po strategię wzrostu — łączymy estetykę, technologię i wyniki.",
-            primaryCta: "Porozmawiajmy",
-            explore: "Zobacz"
+          skipIntro:"Pomiń intro",
+          nav:{services:"Usługi",pricing:"Pakiety",contact:"Kontakt"},
+          hero:{h1:"Sukces biznesu — rozłóżmy go na czynniki pierwsze.",lead:"Od marketingu i digitalizacji po strategię wzrostu — łączymy estetykę, technologię i wyniki.",primaryCta:"Porozmawiajmy",explore:"Zobacz"},
+          branches:{
+            root:"Sukces biznesu", dive:"Zajrzyj głębiej",
+            a:{title:"Marketing",a1:"Werbetechnik (offline)",a2:"Media digitalne",
+              dm:{gmb:"Google Business (opinie i profil)",social:"Social media (posty i komentarze)",email:"E-mail marketing",video:"Film promocyjny",photo:"Sesja zdjęciowa"}},
+            b:{title:"Digitalizacja",b1:"Strony WWW",b2:"SEO",b3:"Agent AI",b4:"Automatyzacje",b5:"Aplikacje"},
+            c:{title:"Strategia i rozwój",c1:"Pozycjonowanie",c2:"CRO i analityka",c3:"Go-to-market"},
+            more:"Zobacz szczegóły"
           },
-          branches: {
-            root: "Sukces biznesu",
-            a: { title: "Marketing",
-              a1:"Werbetechnik (offline)",
-              a2:"Media digitalne",
-              dm: {
-                gmb:"Google Business (opinie i profil)",
-                social:"Social media (posty i komentarze)",
-                email:"E-mail marketing",
-                video:"Film promocyjny",
-                photo:"Sesja zdjęciowa"
-              }
-            },
-            b: { title: "Digitalizacja", b1:"Strony WWW", b2:"SEO", b3:"Agent AI", b4:"Automatyzacje", b5:"Aplikacje" },
-            c: { title: "Strategia i rozwój", c1:"Pozycjonowanie", c2:"CRO i analityka", c3:"Go-to-market" },
-            more: "Zobacz szczegóły"
+          services:{title:"Usługi"},
+          pricing:{title:"Pakiety",
+            starter:{title:"Starter",p1:"Landing page",p2:"SEO podstawowe",p3:"Konfiguracja analityki",price:"od €990"},
+            growth:{title:"Growth",p1:"Strona (do 8 podstron)",p2:"SEO + plan treści",p3:"Automatyzacje procesów",price:"od €3 900"},
+            custom:{title:"Custom",p1:"Szyty na miarę",p2:"Integracje",p3:"Stała opieka",price:"na zapytanie"},
+            cta:"Wybierz pakiet"
           },
-          services: { title: "Usługi" },
-          pricing: {
-            title: "Pakiety",
-            starter: { title:"Starter", p1:"Landing page", p2:"SEO podstawowe", p3:"Konfiguracja analityki", price:"od €990" },
-            growth:  { title:"Growth",  p1:"Strona (do 8 podstron)", p2:"SEO + plan treści", p3:"Automatyzacje procesów", price:"od €3 900" },
-            custom:  { title:"Custom",  p1:"Szyty na miarę", p2:"Integracje", p3:"Stała opieka", price:"na zapytanie" },
-            cta: "Wybierz pakiet"
-          },
-          contact: {
-            title:"Kontakt",
-            name:"Imię i nazwisko",
-            email:"E-mail",
-            message:"Szczegóły projektu",
-            submit:"Wyślij",
-            thanks:"Wkrótce dostępne — konfigurujemy e-mail. Wiadomość nie została wysłana."
-          },
-          footer: { privacy:"Prywatność", terms:"Regulamin", email:"hello@evout.com" }
+          contact:{title:"Kontakt",name:"Imię i nazwisko",email:"E-mail",message:"Szczegóły projektu",submit:"Wyślij",thanks:"Wkrótce dostępne — konfigurujemy e-mail. Wiadomość nie została wysłana."},
+          footer:{privacy:"Prywatność",terms:"Regulamin",email:"hello@evout.com"}
         },
         ru: {
-          langName: "Русский",
-          skipIntro: "Пропустить интро",
-          nav: { services:"Услуги", pricing:"Пакеты", contact:"Контакты" },
-          hero: {
-            h1: "Успех бизнеса — разложим на части.",
-            lead: "От маркетинга и цифровизации до стратегии роста — эстетика, технологии и результат.",
-            primaryCta: "Обсудить проект",
-            explore: "Подробнее"
+          skipIntro:"Пропустить интро",
+          nav:{services:"Услуги",pricing:"Пакеты",contact:"Контакты"},
+          hero:{h1:"Успех бизнеса — разложим на части.",lead:"От маркетинга и цифровизации до стратегии роста — эстетика, технологии и результат.",primaryCta:"Обсудить проект",explore:"Подробнее"},
+          branches:{
+            root:"Успех бизнеса", dive:"Углубиться",
+            a:{title:"Маркетинг",a1:"Werbetechnik (оффлайн)",a2:"Цифровые медиа",
+              dm:{gmb:"Google Business (отзывы и профиль)",social:"Соцсети (посты и комментарии)",email:"Email-маркетинг",video:"Промо-видео",photo:"Бизнес-фотосессия"}},
+            b:{title:"Цифровизация",b1:"Сайты",b2:"SEO",b3:"AI-агент",b4:"Автоматизация",b5:"Приложения"},
+            c:{title:"Стратегия и рост",c1:"Позиционирование",c2:"CRO и аналитика",c3:"Go-to-market"},
+            more:"Смотреть детали"
           },
-          branches: {
-            root: "Успех бизнеса",
-            a: { title: "Маркетинг",
-              a1:"Werbetechnik (оффлайн)",
-              a2:"Цифровые медиа",
-              dm: {
-                gmb:"Google Business (отзывы и профиль)",
-                social:"Соцсети (посты и комментарии)",
-                email:"Email-маркетинг",
-                video:"Промо-видео",
-                photo:"Фотосессия для бизнеса"
-              }
-            },
-            b: { title: "Цифровизация", b1:"Сайты", b2:"SEO", b3:"AI-агент", b4:"Автоматизация", b5:"Приложения" },
-            c: { title: "Стратегия и рост", c1:"Позиционирование", c2:"CRO и аналитика", c3:"Go-to-market" },
-            more: "Смотреть детали"
+          services:{title:"Услуги"},
+          pricing:{title:"Пакеты",
+            starter:{title:"Starter",p1:"Лендинг",p2:"Базовое SEO",p3:"Настройка аналитики",price:"от €990"},
+            growth:{title:"Growth",p1:"Сайт (до 8 страниц)",p2:"SEO + контент-план",p3:"Автоматизация процессов",price:"от €3 900"},
+            custom:{title:"Custom",p1:"Индивидуально",p2:"Интеграции",p3:"Поддержка",price:"по запросу"},
+            cta:"Выбрать пакет"
           },
-          services: { title: "Услуги" },
-          pricing: {
-            title: "Пакеты",
-            starter: { title:"Starter", p1:"Лендинг", p2:"Базовое SEO", p3:"Настройка аналитики", price:"от €990" },
-            growth:  { title:"Growth",  p1:"Сайт (до 8 страниц)", p2:"SEO + контент-план", p3:"Автоматизация процессов", price:"от €3 900" },
-            custom:  { title:"Custom",  p1:"Индивидуально", p2:"Интеграции", p3:"Поддержка", price:"по запросу" },
-            cta: "Выбрать пакет"
-          },
-          contact: {
-            title:"Контакты",
-            name:"Имя",
-            email:"Email",
-            message:"Детали проекта",
-            submit:"Отправить",
-            thanks:"Скоро — настраиваем email. Сообщение не отправлено."
-          },
-          footer: { privacy:"Конфиденциальность", terms:"Условия", email:"hello@evout.com" }
+          contact:{title:"Контакты",name:"Имя",email:"Email",message:"Детали проекта",submit:"Отправить",thanks:"Скоро — настраиваем email. Сообщение не отправлено."},
+          footer:{privacy:"Конфиденциальность",terms:"Условия",email:"hello@evout.com"}
         },
         ar: {
-          langName: "العربية",
-          skipIntro: "تخطي المقدمة",
-          nav: { services:"الخدمات", pricing:"الباقات", contact:"تواصل" },
-          hero: {
-            h1: "نجاح الأعمال — لنفككه إلى عناصر.",
-            lead: "من التسويق والتحول الرقمي إلى استراتيجية النمو — نمزج الجماليات بالتقنية والنتائج.",
-            primaryCta: "لنتحدث",
-            explore: "استكشف"
+          skipIntro:"تخطي المقدمة",
+          nav:{services:"الخدمات",pricing:"الباقات",contact:"تواصل"},
+          hero:{h1:"نجاح الأعمال — لنفككه إلى عناصر.",lead:"من التسويق والتحول الرقمي إلى استراتيجية النمو — نمزج الجماليات بالتقنية والنتائج.",primaryCta:"لنتحدث",explore:"استكشف"},
+          branches:{
+            root:"نجاح الأعمال", dive:"تعمّق أكثر",
+            a:{title:"التسويق",a1:"Werbetechnik (أوفلاين)",a2:"وسائط رقمية",
+              dm:{gmb:"ملف جوجل للأعمال (المراجعات والملف)",social:"السوشيال (المنشورات والتعليقات)",email:"التسويق بالبريد",video:"فيديو ترويجي",photo:"جلسة تصوير أعمال"}},
+            b:{title:"التحول الرقمي",b1:"مواقع ويب",b2:"SEO",b3:"وكيل ذكاء اصطناعي",b4:"أتمتة",b5:"تطبيقات"},
+            c:{title:"الاستراتيجية والنمو",c1:"التموضع",c2:"CRO وتحليلات",c3:"الذهاب إلى السوق"},
+            more:"شاهد التفاصيل"
           },
-          branches: {
-            root: "نجاح الأعمال",
-            a: { title: "التسويق",
-              a1:"Werbetechnik (أوفلاين)",
-              a2:"وسائط رقمية",
-              dm: {
-                gmb:"ملف جوجل للأعمال (المراجعات والملف)",
-                social:"السوشيال (المنشورات والتعليقات)",
-                email:"البريد الإلكتروني التسويقي",
-                video:"فيديو ترويجي",
-                photo:"جلسة تصوير أعمال"
-              }
-            },
-            b: { title: "التحول الرقمي", b1:"مواقع ويب", b2:"SEO", b3:"وكيل ذكاء اصطناعي", b4:"أتمتة", b5:"تطبيقات" },
-            c: { title: "الاستراتيجية والنمو", c1:"التموضع", c2:"CRO وتحليلات", c3:"الذهاب إلى السوق" },
-            more: "شاهد التفاصيل"
+          services:{title:"الخدمات"},
+          pricing:{title:"الباقات",
+            starter:{title:"Starter",p1:"صفحة هبوط",p2:"SEO أساسي",p3:"إعداد التحليلات",price:"بدءًا من €990"},
+            growth:{title:"Growth",p1:"موقع (حتى 8 صفحات)",p2:"SEO + خطة محتوى",p3:"أتمتة العمليات",price:"بدءًا من €3,900"},
+            custom:{title:"Custom",p1:"حسب الطلب",p2:"تكاملات",p3:"دعم مستمر",price:"حسب الطلب"},
+            cta:"اختر الباقة"
           },
-          services: { title: "الخدمات" },
-          pricing: {
-            title: "الباقات",
-            starter: { title:"Starter", p1:"صفحة هبوط", p2:"SEO أساسي", p3:"إعداد التحليلات", price:"بدءًا من €990" },
-            growth:  { title:"Growth",  p1:"موقع (حتى 8 صفحات)", p2:"SEO + خطة محتوى", p3:"أتمتة العمليات", price:"بدءًا من €3,900" },
-            custom:  { title:"Custom",  p1:"حسب الطلب", p2:"تكاملات", p3:"دعم مستمر", price:"حسب الطلب" },
-            cta: "اختر الباقة"
-          },
-          contact: {
-            title:"تواصل",
-            name:"الاسم",
-            email:"البريد الإلكتروني",
-            message:"تفاصيل المشروع",
-            submit:"إرسال",
-            thanks:"قريبًا — يتم إعداد البريد. لم يتم إرسال رسالتك."
-          },
-          footer: { privacy:"الخصوصية", terms:"الشروط", email:"hello@evout.com" }
+          contact:{title:"تواصل",name:"الاسم",email:"البريد الإلكتروني",message:"تفاصيل المشروع",submit:"إرسال",thanks:"قريبًا — يتم إعداد البريد. لم يتم إرسال رسالتك."},
+          footer:{privacy:"الخصوصية",terms:"الشروط",email:"hello@evout.com"}
         }
       };
     </script>
   </head>
   <body class="h-full font-sans selection:bg-white selection:text-black">
-    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white text-black px-3 py-2 rounded">
-      Skip to content
-    </a>
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white text-black px-3 py-2 rounded">Skip to content</a>
 
-    <!-- INTRO / PRELOADER -->
+    <!-- INTRO -->
     <section id="intro" class="fixed inset-0 z-50 flex items-center justify-center bg-black" aria-label="Intro" aria-live="off">
-      <!-- Moving lines / dots (SVG) -->
-      <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <g id="lines"></g>
-      </svg>
-
-      <!-- Huge EVOUT (drifting slowly up during intro) -->
+      <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><g id="lines"></g></svg>
       <div id="evoutWrap" class="relative w-full flex items-end justify-center evout-drift" style="height:70vh;">
-        <button id="evoutBtn"
-          class="evoutBtn text-white uppercase tracking-[0.15em] font-extrabold"
-          style="font-size:clamp(3rem,12vw,18rem); line-height:0.9;"
-          aria-label="Enter site">
-          EVOUT
-        </button>
+        <button id="evoutBtn" class="text-white uppercase tracking-[0.15em] font-extrabold evoutBtn" style="font-size:clamp(3rem,12vw,18rem); line-height:0.9;" aria-label="Enter site">EVOUT</button>
       </div>
-
-      <!-- Skip intro -->
-      <button id="skipIntro" class="absolute right-3 bottom-3 rounded-full border border-white/50 px-3 py-1.5 text-sm hover:bg-white hover:text-black focus-visible:outline-offset-2">
-        Skip intro
-      </button>
+      <button id="skipIntro" class="absolute right-3 bottom-3 rounded-full border border-white/50 px-3 py-1.5 text-sm hover:bg-white hover:text-black focus-visible:outline-offset-2">Skip intro</button>
     </section>
 
     <!-- HEADER -->
     <header class="sticky top-0 z-40 border-b border-white/10 bg-black/70 backdrop-blur">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         <a href="#" class="font-semibold tracking-wide" aria-label="EVOUT home">EVOUT</a>
-
         <nav aria-label="Primary" class="hidden md:block">
           <ul class="flex items-center gap-6 text-sm">
             <li><a class="hover:underline" data-i18n="nav.services" href="#services">Services</a></li>
@@ -350,16 +201,10 @@
             <li><a class="hover:underline" data-i18n="nav.contact" href="#contact">Contact</a></li>
           </ul>
         </nav>
-
-        <!-- Language -->
         <div class="flex items-center gap-2">
           <label for="lang" class="sr-only">Language</label>
           <select id="lang" class="bg-black border border-white/30 rounded-lg px-2 py-1 text-sm">
-            <option value="en">EN</option>
-            <option value="de">DE</option>
-            <option value="pl">PL</option>
-            <option value="ru">RU</option>
-            <option value="ar">AR</option>
+            <option value="en">EN</option><option value="de">DE</option><option value="pl">PL</option><option value="ru">RU</option><option value="ar">AR</option>
           </select>
         </div>
       </div>
@@ -371,138 +216,133 @@
       <section id="hero" class="relative overflow-hidden">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <header class="max-w-3xl">
-            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight" data-i18n="hero.h1">
-              Business success — let’s split it into parts.
-            </h1>
-            <p class="mt-4 text-lg text-white/80" data-i18n="hero.lead">
-              From marketing and digitalization to growth strategy — we blend aesthetics, technology, and results.
-            </p>
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight" data-i18n="hero.h1">Business success — let’s split it into parts.</h1>
+            <p class="mt-4 text-lg text-white/80" data-i18n="hero.lead">From marketing and digitalization to growth strategy — we blend aesthetics, technology, and results.</p>
             <div class="mt-8 flex flex-wrap items-center gap-3">
               <a href="#contact" class="rounded-xl border border-white px-5 py-3 text-base font-semibold hover:bg-white hover:text-black" data-i18n="hero.primaryCta">Let’s talk</a>
               <a href="#services" class="rounded-xl border border-white/30 px-5 py-3 text-base font-semibold hover:border-white" data-i18n="hero.explore">Explore</a>
             </div>
           </header>
 
-          <!-- Branches grid -->
-          <div class="mt-12 grid gap-6 md:grid-cols-3">
-            <!-- Branch A -->
-            <article class="rounded-2xl border border-white/15 p-6">
-              <button class="branch-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="branchA">
-                <span class="text-xl font-semibold" data-i18n="branches.a.title">Marketing</span>
-                <span aria-hidden="true">+</span>
-              </button>
+          <!-- Root entry -->
+          <div class="mt-12">
+            <button id="rootBtn" class="w-full md:w-auto rounded-2xl border border-white/20 px-6 py-4 flex items-center justify-between gap-4 hover:border-white/40">
+              <div>
+                <div class="text-sm uppercase tracking-wide opacity-70" data-i18n="branches.root">Business success</div>
+                <div class="text-xl font-semibold" data-i18n="branches.dive">Dive deeper</div>
+              </div>
+              <span class="text-2xl" aria-hidden="true">+</span>
+            </button>
+          </div>
 
-              <div id="branchA" class="panel">
-                <!-- Level 2: Werbetechnik -->
-                <div class="mt-4 border-t border-white/10 pt-4">
-                  <button class="sub-branch-btn w-full text-left flex items-center justify-between gap-4 text-white/90" aria-expanded="false" aria-controls="branchA1">
-                    <span data-i18n="branches.a.a1">Werbetechnik (offline)</span>
-                    <span aria-hidden="true">+</span>
-                  </button>
-                  <div id="branchA1" class="panel">
-                    <ul class="mt-3 space-y-2 text-white/80">
-                      <li>• Signage & LED</li>
-                      <li>• Events & booths</li>
-                      <li>• Physical décor / POS</li>
-                    </ul>
+          <!-- Branches grid (revealed after clicking root) -->
+          <div id="branches" class="mt-8 hidden">
+            <div class="grid gap-6 md:grid-cols-3">
+              <!-- Branch A -->
+              <article class="rounded-2xl border border-white/15 p-6">
+                <button class="branch-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="branchA">
+                  <span class="text-xl font-semibold" data-i18n="branches.a.title">Marketing</span>
+                  <span class="pm" aria-hidden="true">+</span>
+                </button>
+                <div id="branchA" class="panel">
+                  <div class="mt-4 border-t border-white/10 pt-4">
+                    <button class="sub-branch-btn w-full text-left flex items-center justify-between gap-4 text-white/90" aria-expanded="false" aria-controls="branchA1">
+                      <span data-i18n="branches.a.a1">Werbetechnik (offline)</span>
+                      <span class="pm" aria-hidden="true">+</span>
+                    </button>
+                    <div id="branchA1" class="panel">
+                      <ul class="mt-3 space-y-2 text-white/80">
+                        <li>• Signage & LED</li>
+                        <li>• Events & booths</li>
+                        <li>• Physical décor / POS</li>
+                      </ul>
+                    </div>
                   </div>
-                </div>
 
-                <!-- Level 2: Digital media -->
-                <div class="mt-4 border-t border-white/10 pt-4">
-                  <button class="sub-branch-btn w-full text-left flex items-center justify-between gap-4 text-white/90" aria-expanded="false" aria-controls="branchA2">
-                    <span data-i18n="branches.a.a2">Digital media</span>
-                    <span aria-hidden="true">+</span>
-                  </button>
-                  <div id="branchA2" class="panel">
-                    <!-- Level 3: nested granular items -->
-                    <ul class="mt-3 divide-y divide-white/10">
-                      <li class="py-3">
-                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2gmb">
-                          <span data-i18n="branches.a.dm.gmb">Google Business (reviews & profile)</span>
-                          <span aria-hidden="true">+</span>
-                        </button>
-                        <div id="leafA2gmb" class="panel">
-                          <p class="mt-2 text-white/70 text-sm">Setup & optimization, review responses, posts.</p>
-                        </div>
-                      </li>
-                      <li class="py-3">
-                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2social">
-                          <span data-i18n="branches.a.dm.social">Social media (posts & comments)</span>
-                          <span aria-hidden="true">+</span>
-                        </button>
-                        <div id="leafA2social" class="panel">
-                          <p class="mt-2 text-white/70 text-sm">Publishing, community management, playbooks.</p>
-                        </div>
-                      </li>
-                      <li class="py-3">
-                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2email">
-                          <span data-i18n="branches.a.dm.email">Email marketing</span>
-                          <span aria-hidden="true">+</span>
-                        </button>
-                        <div id="leafA2email" class="panel">
-                          <p class="mt-2 text-white/70 text-sm">Newsletters, automations, deliverability.</p>
-                        </div>
-                      </li>
-                      <li class="py-3">
-                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2video">
-                          <span data-i18n="branches.a.dm.video">Promotional video</span>
-                          <span aria-hidden="true">+</span>
-                        </button>
-                        <div id="leafA2video" class="panel">
-                          <p class="mt-2 text-white/70 text-sm">Script, shoot, edit, short-form & ads.</p>
-                        </div>
-                      </li>
-                      <li class="py-3">
-                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2photo">
-                          <span data-i18n="branches.a.dm.photo">Business photoshoot</span>
-                          <span aria-hidden="true">+</span>
-                        </button>
-                        <div id="leafA2photo" class="panel">
-                          <p class="mt-2 text-white/70 text-sm">Brand, product, team — guidelines & sets.</p>
-                        </div>
-                      </li>
-                    </ul>
+                  <div class="mt-4 border-t border-white/10 pt-4">
+                    <button class="sub-branch-btn w-full text-left flex items-center justify-between gap-4 text-white/90" aria-expanded="false" aria-controls="branchA2">
+                      <span data-i18n="branches.a.a2">Digital media</span>
+                      <span class="pm" aria-hidden="true">+</span>
+                    </button>
+                    <div id="branchA2" class="panel">
+                      <ul class="mt-3 divide-y divide-white/10">
+                        <li class="py-3">
+                          <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2gmb">
+                            <span data-i18n="branches.a.dm.gmb">Google Business (reviews & profile)</span>
+                            <span class="pm" aria-hidden="true">+</span>
+                          </button>
+                          <div id="leafA2gmb" class="panel"><p class="mt-2 text-white/70 text-sm">Setup & optimization, review responses, posts.</p></div>
+                        </li>
+                        <li class="py-3">
+                          <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2social">
+                            <span data-i18n="branches.a.dm.social">Social media (posts & comments)</span>
+                            <span class="pm" aria-hidden="true">+</span>
+                          </button>
+                          <div id="leafA2social" class="panel"><p class="mt-2 text-white/70 text-sm">Publishing, community management, playbooks.</p></div>
+                        </li>
+                        <li class="py-3">
+                          <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2email">
+                            <span data-i18n="branches.a.dm.email">Email marketing</span>
+                            <span class="pm" aria-hidden="true">+</span>
+                          </button>
+                          <div id="leafA2email" class="panel"><p class="mt-2 text-white/70 text-sm">Newsletters, automations, deliverability.</p></div>
+                        </li>
+                        <li class="py-3">
+                          <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2video">
+                            <span data-i18n="branches.a.dm.video">Promotional video</span>
+                            <span class="pm" aria-hidden="true">+</span>
+                          </button>
+                          <div id="leafA2video" class="panel"><p class="mt-2 text-white/70 text-sm">Script, shoot, edit, short-form & ads.</p></div>
+                        </li>
+                        <li class="py-3">
+                          <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2photo">
+                            <span data-i18n="branches.a.dm.photo">Business photoshoot</span>
+                            <span class="pm" aria-hidden="true">+</span>
+                          </button>
+                          <div id="leafA2photo" class="panel"><p class="mt-2 text-white/70 text-sm">Brand, product, team — guidelines & sets.</p></div>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
+
+                  <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
                 </div>
+              </article>
 
-                <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
-              </div>
-            </article>
+              <!-- Branch B -->
+              <article class="rounded-2xl border border-white/15 p-6">
+                <button class="branch-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="branchB">
+                  <span class="text-xl font-semibold" data-i18n="branches.b.title">Digitalization</span>
+                  <span class="pm" aria-hidden="true">+</span>
+                </button>
+                <div id="branchB" class="panel">
+                  <ul class="mt-4 space-y-2 text-white/80">
+                    <li>• <span data-i18n="branches.b.b1">Websites</span> — fast, accessible, Next.js</li>
+                    <li>• <span data-i18n="branches.b.b2">SEO</span> — technical & content</li>
+                    <li>• <span data-i18n="branches.b.b3">AI Agent</span> — chat/assistant, receptionist</li>
+                    <li>• <span data-i18n="branches.b.b4">Automations</span> — ops & CRM</li>
+                    <li>• <span data-i18n="branches.b.b5">Applications</span> — internal or customer-facing</li>
+                  </ul>
+                  <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
+                </div>
+              </article>
 
-            <!-- Branch B -->
-            <article class="rounded-2xl border border-white/15 p-6">
-              <button class="branch-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="branchB">
-                <span class="text-xl font-semibold" data-i18n="branches.b.title">Digitalization</span>
-                <span aria-hidden="true">+</span>
-              </button>
-              <div id="branchB" class="panel">
-                <ul class="mt-4 space-y-2 text-white/80">
-                  <li>• <span data-i18n="branches.b.b1">Websites</span> — fast, accessible, Next.js</li>
-                  <li>• <span data-i18n="branches.b.b2">SEO</span> — technical & content</li>
-                  <li>• <span data-i18n="branches.b.b3">AI Agent</span> — chat/assistant, receptionist</li>
-                  <li>• <span data-i18n="branches.b.b4">Automations</span> — ops & CRM</li>
-                  <li>• <span data-i18n="branches.b.b5">Applications</span> — internal or customer-facing</li>
-                </ul>
-                <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
-              </div>
-            </article>
-
-            <!-- Branch C -->
-            <article class="rounded-2xl border border-white/15 p-6">
-              <button class="branch-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="branchC">
-                <span class="text-xl font-semibold" data-i18n="branches.c.title">Strategy & Growth</span>
-                <span aria-hidden="true">+</span>
-              </button>
-              <div id="branchC" class="panel">
-                <ul class="mt-4 space-y-2 text-white/80">
-                  <li>• <span data-i18n="branches.c.c1">Positioning</span> — ICP, messaging, offer</li>
-                  <li>• <span data-i18n="branches.c.c2">CRO & Analytics</span> — A/B, funnels, GA4</li>
-                  <li>• <span data-i18n="branches.c.c3">Go-to-market</span> — roadmap & experiments</li>
-                </ul>
-                <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
-              </div>
-            </article>
+              <!-- Branch C -->
+              <article class="rounded-2xl border border-white/15 p-6">
+                <button class="branch-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="branchC">
+                  <span class="text-xl font-semibold" data-i18n="branches.c.title">Strategy & Growth</span>
+                  <span class="pm" aria-hidden="true">+</span>
+                </button>
+                <div id="branchC" class="panel">
+                  <ul class="mt-4 space-y-2 text-white/80">
+                    <li>• <span data-i18n="branches.c.c1">Positioning</span> — ICP, messaging, offer</li>
+                    <li>• <span data-i18n="branches.c.c2">CRO & Analytics</span> — A/B, funnels, GA4</li>
+                    <li>• <span data-i18n="branches.c.c3">Go-to-market</span> — roadmap & experiments</li>
+                  </ul>
+                  <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
+                </div>
+              </article>
+            </div>
           </div>
         </div>
       </section>
@@ -586,7 +426,6 @@
       </section>
     </main>
 
-    <!-- FOOTER -->
     <footer class="border-t border-white/10 py-10">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm">&copy; <span id="year"></span> EVOUT</p>
@@ -600,165 +439,139 @@
       </div>
     </footer>
 
-    <!-- JS: intro, branches, nested panels, i18n, contact -->
+    <!-- JS -->
     <script>
       (function () {
-        const $ = (s, r = document) => r.querySelector(s);
-        const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+        const $ = (s, r=document) => r.querySelector(s);
+        const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
         const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         // Year
-        const year = $('#year'); if (year) year.textContent = new Date().getFullYear();
+        $('#year')?.append(new Date().getFullYear());
 
         // ===== i18n =====
         const langSelect = $('#lang');
-        const setDir = (code) => {
-          const rtl = code === 'ar';
-          document.documentElement.dir = rtl ? 'rtl' : 'ltr';
-          document.documentElement.lang = code;
-        };
-        function applyI18n(code) {
-          const dict = I18N[code] || I18N[APP_CONFIG.DEFAULT_LANG];
-          $$("[data-i18n]").forEach(el => {
-            const path = el.getAttribute("data-i18n").split('.');
-            let cur = dict;
-            for (const p of path) cur = cur?.[p];
+        const setDir = (code) => { const rtl = code === 'ar'; document.documentElement.dir = rtl ? 'rtl' : 'ltr'; document.documentElement.lang = code; };
+        const applyI18n = (code) => {
+          const d = I18N[code] || I18N[APP_CONFIG.DEFAULT_LANG];
+          $$('[data-i18n]').forEach(el => {
+            const path = el.getAttribute('data-i18n').split('.');
+            let cur = d; for (const p of path) cur = cur?.[p];
             if (typeof cur === 'string') el.textContent = cur;
           });
-          const skip = $('#skipIntro'); if (skip) skip.textContent = dict.skipIntro || 'Skip intro';
+          $('#skipIntro') && ($('#skipIntro').textContent = d.skipIntro || 'Skip intro');
           setDir(code);
-        }
-        function persistLang(code) { try { localStorage.setItem('lang', code); } catch {} }
-        function readLang() { try { return new URL(location.href).searchParams.get('lang') || localStorage.getItem('lang') || APP_CONFIG.DEFAULT_LANG; } catch { return APP_CONFIG.DEFAULT_LANG; } }
-        const initialLang = readLang();
-        langSelect.value = initialLang;
-        applyI18n(initialLang);
-        langSelect.addEventListener('change', () => {
-          const code = langSelect.value;
-          persistLang(code);
-          applyI18n(code);
-        });
+        };
+        const persistLang = (c) => { try { localStorage.setItem('lang', c); } catch {} };
+        const readLang = () => { try { return new URL(location.href).searchParams.get('lang') || localStorage.getItem('lang') || APP_CONFIG.DEFAULT_LANG; } catch { return APP_CONFIG.DEFAULT_LANG; } };
+        const initialLang = readLang(); langSelect.value = initialLang; applyI18n(initialLang);
+        langSelect.addEventListener('change', () => { const c = langSelect.value; persistLang(c); applyI18n(c); });
 
-        // ===== Preloader SVG generation (slower) =====
+        // ===== Intro SVG =====
         const linesG = $('#lines');
         const DOTS = Math.max(3, APP_CONFIG.DOTS|0);
-        const intro = $('#intro');
-        const evoutBtn = $('#evoutBtn');
-        const evoutWrap = $('#evoutWrap');
-        const skipBtn = $('#skipIntro');
-        const HERO = $('#hero');
-
-        // set drift duration to intro time
-        evoutWrap?.style.setProperty('--intro-ms', (prefersReduced ? 300 : APP_CONFIG.INTRO_MS) + 'ms');
-
         if (linesG) {
-          for (let i = 0; i < DOTS; i++) {
-            const x = 5 + i * (90 / (DOTS - 1)); // 5..95 evenly
-            const base = 8000;      // 8s
-            const jitter = 6000;    // + up to 6s
-            const dur = prefersReduced ? 300 : base + Math.floor(Math.random() * jitter);
-            const delay = (i % 4) * 250;
-
-            const group = document.createElementNS('http://www.w3.org/2000/svg','g');
-            group.setAttribute('class', 'cosmic-line');
-            group.style.animationDuration = dur + 'ms';
-            group.style.animationDelay = delay + 'ms';
-
+          for (let i=0;i<DOTS;i++){
+            const x = 5 + i*(90/(DOTS-1));
+            const base = 8000, jitter = 6000;
+            const dur = prefersReduced ? 300 : base + Math.floor(Math.random()*jitter);
+            const delay = (i%4)*250;
+            const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+            g.setAttribute('class','cosmic-line'); g.style.animationDuration = dur+'ms'; g.style.animationDelay = delay+'ms';
             const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-            line.setAttribute('x1', x); line.setAttribute('x2', x);
-            line.setAttribute('y1', '0'); line.setAttribute('y2', '100');
-            line.setAttribute('stroke', 'white'); line.setAttribute('stroke-width', '0.2');
-            line.setAttribute('stroke-opacity', '0.25');
-
+            line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1','0'); line.setAttribute('y2','100');
+            line.setAttribute('stroke','white'); line.setAttribute('stroke-width','0.2'); line.setAttribute('stroke-opacity','0.25');
             const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
-            dot.setAttribute('cx', x);
-            dot.setAttribute('cy', String(20 + Math.random()*60));
-            dot.setAttribute('r', '0.8');
-            dot.setAttribute('fill', 'white');
-
-            group.appendChild(line);
-            group.appendChild(dot);
-            linesG.appendChild(group);
+            dot.setAttribute('cx',x); dot.setAttribute('cy', String(20+Math.random()*60)); dot.setAttribute('r','0.8'); dot.setAttribute('fill','white');
+            g.append(line,dot); linesG.append(g);
           }
         }
 
-        // EVOUT pulse (subtle)
+        // ===== Intro flow =====
+        const intro = $('#intro'), evoutWrap = $('#evoutWrap'), evoutBtn = $('#evoutBtn'), skipBtn = $('#skipIntro'), HERO = $('#hero');
+        // durations to CSS vars
+        document.documentElement.style.setProperty('--intro-ms', (prefersReduced ? 300 : APP_CONFIG.INTRO_MS)+'ms');
+        document.documentElement.style.setProperty('--slide-up-ms', (prefersReduced ? 0 : APP_CONFIG.SLIDE_UP_MS)+'ms');
+        document.documentElement.style.setProperty('--fade-ms', (prefersReduced ? 200 : APP_CONFIG.FADE_MS)+'ms');
+
         if (evoutBtn && !prefersReduced && APP_CONFIG.PULSE) evoutBtn.classList.add('evout-pulse');
 
-        // Click → slide up fast
-        if (evoutBtn) {
-          evoutBtn.addEventListener('click', goToHero);
-          evoutBtn.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToHero(); }
-          });
-        }
-
-        // Skip intro
-        if (skipBtn) {
-          skipBtn.addEventListener('click', endIntroNow);
-          document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') endIntroNow();
-          });
-        }
-
-        // Auto end after INTRO_MS
-        let introTimer = setTimeout(endIntroNow, prefersReduced ? 300 : APP_CONFIG.INTRO_MS);
-
-        function endIntroNow() {
-          clearTimeout(introTimer);
+        let endTimer = setTimeout(endIntro, prefersReduced ? 300 : APP_CONFIG.INTRO_MS);
+        function endIntro() {
+          clearTimeout(endTimer);
           if (!intro) return;
-          intro.classList.add('hidden');
-          HERO?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+          intro.classList.add('intro-fade');
+          setTimeout(() => {
+            intro.classList.add('hidden');
+            HERO?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+          }, prefersReduced ? 0 : APP_CONFIG.FADE_MS);
         }
-
         function goToHero() {
-          if (!evoutWrap) return endIntroNow();
-          evoutWrap.style.setProperty('--slide-up-ms', `${APP_CONFIG.SLIDE_UP_MS}ms`);
+          if (!evoutWrap) return endIntro();
           evoutWrap.classList.add('slide-up');
-          setTimeout(endIntroNow, prefersReduced ? 0 : APP_CONFIG.SLIDE_UP_MS);
+          setTimeout(endIntro, prefersReduced ? 0 : APP_CONFIG.SLIDE_UP_MS);
         }
 
-        // ===== Accordions (3 levels) =====
+        evoutBtn?.addEventListener('click', goToHero);
+        evoutBtn?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' ') { e.preventDefault(); goToHero(); } });
+        skipBtn?.addEventListener('click', endIntro);
+        document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') endIntro(); });
+
+        // ===== Root → reveal branches =====
+        const rootBtn = $('#rootBtn');
+        const branchesWrap = $('#branches');
+        rootBtn?.addEventListener('click', () => {
+          branchesWrap.classList.toggle('hidden');
+          const pm = rootBtn.querySelector('span[aria-hidden="true"]');
+          if (pm) pm.textContent = branchesWrap.classList.contains('hidden') ? '+' : '–';
+          if (!branchesWrap.classList.contains('hidden')) branchesWrap.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+        });
+
+        // ===== Accordions: toggle +/– and auto-height recalculation (including ancestors) =====
+        function toggleBtn(btn) {
+          const panel = document.getElementById(btn.getAttribute('aria-controls'));
+          const expanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!expanded));
+          const pm = btn.querySelector('.pm'); if (pm) pm.textContent = expanded ? '+' : '–';
+          if (!panel) return;
+          if (!expanded) { openPanel(panel); } else { closePanel(panel); }
+          recalcAncestors(panel);
+        }
+        function openPanel(panel) {
+          panel.classList.add('open');
+          panel.style.setProperty('--h', panel.scrollHeight + 'px');
+        }
+        function closePanel(panel) {
+          panel.style.setProperty('--h', panel.scrollHeight + 'px'); void panel.offsetHeight;
+          panel.classList.remove('open');
+        }
+        function recalcAncestors(el) {
+          let p = el?.parentElement;
+          while (p) {
+            if (p.classList?.contains('panel') && p.classList?.contains('open')) {
+              p.style.setProperty('--h', p.scrollHeight + 'px');
+            }
+            p = p.parentElement;
+          }
+        }
         function bindAccordion(selector) {
           $$(selector).forEach(btn => {
-            const panel = document.getElementById(btn.getAttribute('aria-controls'));
-            const toggle = () => {
-              const expanded = btn.getAttribute('aria-expanded') === 'true';
-              btn.setAttribute('aria-expanded', String(!expanded));
-              if (!panel) return;
-              if (!expanded) {
-                panel.classList.add('open');
-                panel.style.setProperty('--h', panel.scrollHeight + 'px');
-              } else {
-                panel.style.setProperty('--h', panel.scrollHeight + 'px'); // set current height to animate from
-                // force reflow
-                void panel.offsetHeight;
-                panel.classList.remove('open');
-              }
-            };
-            btn.addEventListener('click', toggle);
-            btn.addEventListener('keydown', (e) => {
-              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
-            });
+            btn.addEventListener('click', ()=>toggleBtn(btn));
+            btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' ') { e.preventDefault(); toggleBtn(btn); } });
           });
         }
-        bindAccordion('.branch-btn');
-        bindAccordion('.sub-branch-btn');
-        bindAccordion('.leaf-btn');
+        bindAccordion('.branch-btn'); bindAccordion('.sub-branch-btn'); bindAccordion('.leaf-btn');
+        window.addEventListener('resize', () => { $$('.panel.open').forEach(p => p.style.setProperty('--h', p.scrollHeight + 'px')); });
 
-        // ===== Contact form (light) — "Coming soon" =====
-        const form = document.querySelector('form');
-        const formStatus = $('#formStatus');
-        if (form && formStatus) {
-          form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const lang = document.documentElement.lang || 'en';
-            const dict = I18N[lang] || I18N.en;
-            formStatus.hidden = false;
-            formStatus.textContent = dict.contact?.thanks || 'Coming soon — email setup in progress. Your message was not sent.';
-            form.reset();
-          });
-        }
+        // ===== Contact form (Coming soon) =====
+        const form = document.querySelector('form'); const status = $('#formStatus');
+        form?.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const lang = document.documentElement.lang || 'en';
+          const dict = I18N[lang] || I18N.en;
+          status.hidden = false; status.textContent = dict.contact?.thanks || 'Coming soon — email setup in progress. Your message was not sent.';
+          form.reset();
+        });
       })();
     </script>
 
