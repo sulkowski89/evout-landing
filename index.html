@@ -1,295 +1,311 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EVOUT</title>
-  <style>
-    /* =========================
-       KONFIGURACJA
-    ========================= */
-    :root{
-      --bg:#000;              /* tło ciemne */
-      --fg:#fff;              /* tekst ciemny */
-      --bg-light:#fff;        /* tło jasne */
-      --fg-light:#000;        /* tekst jasny */
+<!-- index.html -->
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+  <head>
+    <!-- Config (łatwe tuningi bez szukania po pliku) -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="description" content="EVOUT — electric vehicle software" />
+    <meta name="robots" content="index,follow" />
 
-      /* preloader (ring) */
-      --swirl-color1:#8a2be2;   /* fiolet */
-      --swirl-color2:#00ff7f;   /* zieleń */
-      --swirl-speed:1.6s;
-      --swirl-size:280px;
+    <!-- Open Graph / Twitter (placeholdery do podmiany) -->
+    <meta property="og:title" content="EVOUT" />
+    <meta property="og:description" content="Electric vehicle software." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://evout.com" />
+    <meta property="og:image" content="/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-      /* przejście motywu i scen */
-      --theme-fade:650ms;
-      --modal-fade:400ms;
-      --hero-fade:500ms;
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
-      /* hero */
-      --hero-width-desktop:70vw;
-      --hero-width-max:1100px;
-      --hero-width-mobile:92vw;
-    }
+    <title>EVOUT</title>
 
-    html,body{
-      height:100%; margin:0;
-      background:var(--bg); color:var(--fg);
-      font-family:Arial,Helvetica,sans-serif;
-      transition: background-color var(--theme-fade) ease, color var(--theme-fade) ease;
-    }
-    /* po przejściu na jasny motyw zmieniamy zmienne tylko dla body i potomków */
-    body.theme-light{
-      --bg:var(--bg-light);
-      --fg:var(--fg-light);
-    }
+    <!-- Tailwind via CDN (dev/proto). W Next: pełny Tailwind i purge. -->
+    <script>
+      // Prefer dark based on system
+      try {
+        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+      } catch {}
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tailwind config (tunable)
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#eef6ff',
+                100: '#d9ebff',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                900: '#0b1220',
+              },
+            },
+            fontFamily: {
+              sans: [
+                '-apple-system','BlinkMacSystemFont','Segoe UI','Inter','Roboto','Helvetica','Arial','sans-serif'
+              ],
+            },
+          },
+        },
+      };
+    </script>
 
-    /* ===== PRELOADER (clean energy ring) ===== */
+    <style>
+      /* A11y: widoczny focus także przy mouse */
+      :root { --ring: 3px; }
+      :focus-visible { outline: var(--ring) solid rgb(59 130 246 / 0.6); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) {
+        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+      }
+    </style>
 
-/* 1) Rejestrujemy animowalną zmienną — promień WEWNĘTRZNY ringu.
-   Zmieniamy tylko JEDNĄ wartość, więc nie ma desynchronizacji warstw. */
-@property --inner {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 48%;
-}
+    <!-- JSON-LD (placeholder) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "EVOUT",
+        "url": "https://evout.com",
+        "logo": "https://evout.com/icon.svg"
+      }
+    </script>
+  </head>
 
-/* 2) Kontener preloadera */
-#preloader, #app {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-#preloader {
-  background: var(--bg);
-  transition: opacity .4s ease;
-  z-index: 100;
-}
+  <body class="h-full bg-white text-slate-900 antialiased dark:bg-brand-900 dark:text-slate-100">
+    <!-- Skip link -->
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 rounded">
+      Skip to content
+    </a>
 
-/* 3) Sam ring – jedna warstwa (::before), bez ::after */
-.swirl {
-  width: min(50vmin, var(--swirl-size));
-  height: min(50vmin, var(--swirl-size));
-  position: relative;
-  /* delikatny blask w kolorze zieleni */
-  filter: drop-shadow(0 0 18px color-mix(in oklab, var(--swirl-color2) 60%, white));
-}
+    <!-- Header -->
+    <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-brand-900/60">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <a href="/" class="flex items-center gap-2" aria-label="EVOUT home">
+            <img src="/logo.svg" alt="" width="32" height="32" decoding="async" class="h-8 w-8" />
+            <span class="font-semibold">EVOUT</span>
+          </a>
 
-/* 4) Warstwa ringu: kolorowy CONIC + maska RADIAL sterowana --inner */
-.swirl::before {
-  content: "";
-  position: absolute; inset: 0;
-  border-radius: 50%;
+          <nav aria-label="Primary" class="hidden md:block">
+            <ul class="flex items-center gap-6">
+              <li><a class="hover:underline" href="#features" data-i18n="nav.features">Features</a></li>
+              <li><a class="hover:underline" href="#pricing" data-i18n="nav.pricing">Pricing</a></li>
+              <li><a class="hover:underline" href="#contact" data-i18n="nav.contact">Contact</a></li>
+            </ul>
+          </nav>
 
-  /* kolor: płynny fiolet ↔ zieleń, obracany w czasie */
-  background: conic-gradient(from 0deg,
-    var(--swirl-color1),
-    var(--swirl-color2),
-    var(--swirl-color1)
-  );
+          <div class="flex items-center gap-2">
+            <!-- Language switcher (placeholder, działa jako linki z hreflang) -->
+            <div class="relative">
+              <button id="langBtn" class="inline-flex items-center gap-1 rounded-xl border px-3 py-1.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800" aria-haspopup="listbox" aria-expanded="false">
+                <span aria-hidden="true">🌐</span>
+                <span class="sr-only">Change language</span>
+                <span data-i18n="lang.current">EN</span>
+              </button>
+              <ul id="langMenu" role="listbox" tabindex="-1" class="invisible absolute right-0 mt-2 min-w-28 origin-top-right rounded-xl border bg-white p-1 shadow-lg opacity-0 transition md:min-w-32 dark:bg-slate-900" aria-label="Select language">
+                <li><a role="option" aria-selected="true" hreflang="en" lang="en" class="block rounded-lg px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800" href="?lang=en">English</a></li>
+                <li><a role="option" aria-selected="false" hreflang="de" lang="de" class="block rounded-lg px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800" href="?lang=de">Deutsch</a></li>
+                <li><a role="option" aria-selected="false" hreflang="pl" lang="pl" class="block rounded-lg px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800" href="?lang=pl">Polski</a></li>
+              </ul>
+            </div>
 
-  /* Maska tworzy PIERŚCIEŃ: od środka do --inner jest „pełne”,
-     między --inner a (--inner + 2%) jest „dziura”, co daje grubość ringu ≈ 2% */
-  -webkit-mask: radial-gradient(circle,
-    #000 var(--inner),
-    transparent calc(var(--inner) + 2%)
-  );
-          mask: radial-gradient(circle,
-    #000 var(--inner),
-    transparent calc(var(--inner) + 2%)
-  );
+            <a href="#cta" class="hidden sm:inline-flex rounded-xl bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 focus-visible:outline-offset-2" data-i18n="nav.cta">
+              Get started
+            </a>
 
-  /* Dwie animacje NARAZ: obrót + „oddech” grubości (zmieniamy --inner).
-     Brak przeskoku, bo od 1. klatki obowiązuje ta sama maska i ta sama zmienna. */
-  animation:
-    spin var(--swirl-speed) linear infinite,
-    breathe 2.4s ease-in-out infinite alternate;
-}
-
-/* 5) Obrót ringu */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* 6) „Oddech” – płynnie zwężamy/poszerzamy ring jedną zmienną */
-@keyframes breathe {
-  from { --inner: 48%; }  /* startowa grubość (stały wygląd od 1. klatki) */
-  to   { --inner: 45%; }  /* minimalnie grubszy ring na szczycie animacji */
-}
-    
-    /* ===== APP ===== */
-    #app{opacity:0;pointer-events:none;transition:opacity .6s ease}
-    #app.show{opacity:1;pointer-events:auto}
-
-    /* Landing logo */
-    .logo{
-      margin:0; white-space:nowrap; line-height:1; font-weight:800; letter-spacing:.08em;
-      font-size:clamp(40px,20vw,16rem);
-      color:var(--fg);
-      opacity:0; transform:translateY(8px);
-      animation:fadeInUp .8s ease 60ms both, pulse 2.6s ease-in-out .9s infinite alternate;
-      cursor:pointer; outline:none; user-select:none; z-index:1;
-      text-shadow:0 0 12px rgba(0,0,0,.08);
-      position:relative;
-      transition: color var(--theme-fade) ease;
-    }
-    @keyframes fadeInUp{to{opacity:1;transform:none}}
-    @keyframes pulse{to{transform:scale(1.1)}}
-    @keyframes fadeOutUp{to{opacity:0;transform:translateY(-6px)}}
-    .logo.fadeout{animation:fadeOutUp .25s ease forwards}
-
-    /* Language modal */
-    #lang{
-      position:fixed; inset:0; display:none; place-items:center;
-      background:rgba(0,0,0,.6); backdrop-filter:saturate(120%) blur(2px);
-      z-index:10; opacity:0; transition:opacity var(--modal-fade) ease;
-    }
-    #lang.show{ display:grid; opacity:1; }
-    #lang.fadeout{ opacity:0; } /* płynne znikanie */
-
-    .card{
-      padding:24px 22px; border-radius:18px; background:#0b0b0b;
-      box-shadow:0 10px 30px rgba(0,0,0,.5);
-      min-width:min(92vw,480px); text-align:center;
-      transition: background-color var(--theme-fade) ease, color var(--theme-fade) ease;
-      color:#fff;
-    }
-    /* aby na jasnym motywie całość spójnie zbladła */
-    body.theme-light #lang .card{ background:#f4f4f4; color:#000; }
-
-    .row{ display:flex; flex-direction:column; gap:12px; align-items:stretch; margin-top:14px }
-    .btn{
-      padding:12px 16px; border-radius:12px; background:#111; color:#fff;
-      border:1px solid #222; font-weight:700; letter-spacing:.04em; cursor:pointer;
-      transition: background-color .2s ease, color .2s ease, border-color .2s ease;
-    }
-    .btn:hover{ border-color:#444 }
-    body.theme-light .btn{ background:#fff; color:#000; border-color:#d9d9d9 }
-    body.theme-light .btn:hover{ border-color:#bbb }
-
-    /* Hero */
-    #hero{ position:absolute; inset:0; display:none; place-items:center; text-align:center; padding:24px; opacity:0; transition:opacity var(--hero-fade) ease }
-    #hero.show{ display:grid; }
-    #hero.visible{ opacity:1; }
-
-    .hero-wrap{ width:min(var(--hero-width-desktop), var(--hero-width-max)); margin:0 auto }
-    @media (max-width:900px){ .hero-wrap{ width:var(--hero-width-mobile) } }
-
-    .hero-title{ margin:0 0 .3em; font-weight:800; letter-spacing:.04em; line-height:1; font-size:clamp(48px,12vw,140px) }
-    .hero-tagline{ margin:.1em 0 .35em; opacity:.9; font-weight:600; font-size:clamp(16px,3.2vw,28px) }
-    .hero-soon{ margin:0; opacity:.75; letter-spacing:.08em; text-transform:uppercase; font-size:clamp(12px,2.2vw,16px) }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion:reduce){
-      .swirl{animation:none}
-      .logo{animation:none;opacity:1;transform:none}
-      #preloader,#app{transition:none}
-      #lang{transition:none}
-      #hero{transition:none}
-      html,body{transition:none}
-    }
-  </style>
-</head>
-<body>
-  <!-- PRELOADER -->
-  <div id="preloader" aria-hidden="true">
-    <div class="swirl" aria-label="Ładowanie"></div>
-  </div>
-
-  <!-- APP -->
-  <div id="app" role="main" aria-live="polite">
-    <h1 class="logo" id="logo" tabindex="0" role="button" aria-label="Wejdź do EVOUT">EVOUT</h1>
-
-    <!-- LANGUAGE -->
-    <div id="lang" aria-modal="true" role="dialog" aria-label="Wybór języka">
-      <div class="card">
-        <h3>Choose language</h3>
-        <div class="row">
-          <button class="btn" data-lang="en">English</button>
-          <button class="btn" data-lang="de">Deutsch</button>
-          <button class="btn" data-lang="pl">Polski</button>
+            <button id="menuBtn" class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
+              <span aria-hidden="true">☰</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- HERO -->
-    <section id="hero">
-      <div class="hero-wrap">
-        <h1 class="hero-title">EVOUT</h1>
-        <p class="hero-tagline" id="tagline">Marketing & IT solutions for your business</p>
-        <p class="hero-soon" id="soon">Coming soon</p>
+      <!-- Mobile nav -->
+      <nav id="mobileNav" class="md:hidden hidden border-t bg-white dark:bg-brand-900" aria-label="Mobile">
+        <ul class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
+          <li><a class="block px-2 py-2" href="#features" data-i18n="nav.features">Features</a></li>
+          <li><a class="block px-2 py-2" href="#pricing" data-i18n="nav.pricing">Pricing</a></li>
+          <li><a class="block px-2 py-2" href="#contact" data-i18n="nav.contact">Contact</a></li>
+          <li><a class="mt-1 inline-flex w-full justify-center rounded-xl bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700" href="#cta" data-i18n="nav.cta">Get started</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Hero -->
+    <section id="hero" class="relative overflow-hidden">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div class="grid items-center gap-10 md:grid-cols-2">
+          <div>
+            <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl" data-i18n="hero.title">
+              Manage EV charging like a pro
+            </h1>
+            <p class="mt-4 text-lg text-slate-600 dark:text-slate-300" data-i18n="hero.subtitle">
+              Monitoring, billing, and smart schedules — all in one place.
+            </p>
+            <div class="mt-8 flex flex-wrap items-center gap-3">
+              <a id="cta" href="#pricing" class="rounded-xl bg-brand-600 px-5 py-3 text-base font-semibold text-white hover:bg-brand-700" data-i18n="hero.ctaPrimary">Start free</a>
+              <a href="#features" class="rounded-xl border px-5 py-3 text-base font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" data-i18n="hero.ctaSecondary">See features</a>
+            </div>
+          </div>
+          <div class="relative">
+            <picture>
+              <source type="image/avif" srcset="/hero.avif" />
+              <source type="image/webp" srcset="/hero.webp" />
+              <img src="/hero.jpg" alt="" width="800" height="520" decoding="async" loading="lazy" class="w-full rounded-2xl shadow-xl" />
+            </picture>
+          </div>
+        </div>
       </div>
     </section>
-  </div>
 
-  <script>
-    // Dev: ?skipintro=1
-    const params = new URLSearchParams(location.search);
-    const skip = params.get('skipintro') === '1';
+    <!-- Features -->
+    <main id="main">
+      <section id="features" class="border-t py-16 sm:py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold" data-i18n="features.title">Features</h2>
+          <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <li class="rounded-2xl border p-6">
+              <h3 class="text-lg font-semibold" data-i18n="features.item1.title">Live Monitoring</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="features.item1.desc">Track sessions in real-time.</p>
+            </li>
+            <li class="rounded-2xl border p-6">
+              <h3 class="text-lg font-semibold" data-i18n="features.item2.title">Billing</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="features.item2.desc">Flexible tariffs and invoicing.</p>
+            </li>
+            <li class="rounded-2xl border p-6">
+              <h3 class="text-lg font-semibold" data-i18n="features.item3.title">Smart Schedules</h3>
+              <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="features.item3.desc">Optimize by grid and price.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
 
-    const pre = document.getElementById('preloader');
-    const app = document.getElementById('app');
-    const logo = document.getElementById('logo');
-    const lang = document.getElementById('lang');
-    const hero = document.getElementById('hero');
-    const tagline = document.getElementById('tagline');
-    const soon = document.getElementById('soon');
+      <!-- Pricing (placeholder) -->
+      <section id="pricing" class="border-t py-16 sm:py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold" data-i18n="pricing.title">Pricing</h2>
+          <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="rounded-2xl border p-6">
+              <header class="flex items-baseline justify-between">
+                <h3 class="text-lg font-semibold" data-i18n="pricing.free.title">Free</h3>
+                <p class="text-2xl font-bold" aria-label="0 dollars"><span aria-hidden="true">$0</span></p>
+              </header>
+              <ul class="mt-4 list-disc pl-5 text-slate-700 dark:text-slate-300">
+                <li data-i18n="pricing.free.item1">Up to 3 chargers</li>
+                <li data-i18n="pricing.free.item2">Email support</li>
+              </ul>
+              <a href="#contact" class="mt-6 inline-flex w-full justify-center rounded-xl bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-700" data-i18n="pricing.cta">Choose plan</a>
+            </article>
+            <!-- Duplikuj dla kolejnych planów -->
+          </div>
+        </div>
+      </section>
 
-    const i18n = {
-      en:{ tagline:"Marketing & IT solutions for your business", soon:"Coming soon" },
-      de:{ tagline:"Marketing- und IT-Lösungen für Ihr Unternehmen", soon:"Bald verfügbar" },
-      pl:{ tagline:"Marketing i rozwiązania IT dla Twojej firmy", soon:"Już wkrótce" }
-    };
+      <!-- Contact -->
+      <section id="contact" class="border-t py-16 sm:py-20">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold" data-i18n="contact.title">Contact</h2>
+          <form action="/api/contact" method="post" class="mt-6 grid gap-4" novalidate>
+            <label class="grid gap-1">
+              <span class="text-sm font-medium" data-i18n="contact.name">Name</span>
+              <input name="name" required autocomplete="name" class="rounded-xl border px-3 py-2" />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-sm font-medium" data-i18n="contact.email">Email</span>
+              <input type="email" name="email" required autocomplete="email" class="rounded-xl border px-3 py-2" />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-sm font-medium" data-i18n="contact.message">Message</span>
+              <textarea name="message" rows="4" required class="rounded-xl border px-3 py-2"></textarea>
+            </label>
+            <button type="submit" class="mt-2 inline-flex justify-center rounded-xl bg-brand-600 px-4 py-2 font-medium text-white hover:bg-brand-700" data-i18n="contact.submit">Send</button>
+            <p class="text-xs text-slate-500" aria-live="polite" id="formStatus" hidden></p>
+          </form>
+        </div>
+      </section>
+    </main>
 
-    function applyLang(code){
-      const dict = i18n[code] || i18n.en;
-      tagline.textContent = dict.tagline;
-      soon.textContent = dict.soon;
-      document.documentElement.lang = code;
-    }
+    <!-- Footer -->
+    <footer class="border-t py-10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm">&copy; <span id="year"></span> EVOUT</p>
+        <nav aria-label="Footer">
+          <ul class="flex flex-wrap gap-4 text-sm">
+            <li><a class="hover:underline" href="/privacy" data-i18n="footer.privacy">Privacy</a></li>
+            <li><a class="hover:underline" href="/terms" data-i18n="footer.terms">Terms</a></li>
+            <li><a class="hover:underline" href="mailto:hello@evout.com" data-i18n="footer.email">hello@evout.com</a></li>
+          </ul>
+        </nav>
+      </div>
+    </footer>
 
-    function showApp(){
-      pre.style.opacity = '0';
-      setTimeout(()=>{ pre.style.display='none'; app.classList.add('show'); }, 400);
-    }
+    <!-- Minimal JS: menu, lang menu, rok, form feedback -->
+    <script>
+      (function () {
+        const $ = (s, r = document) => r.querySelector(s);
+        const menuBtn = $('#menuBtn');
+        const mobileNav = $('#mobileNav');
+        const langBtn = $('#langBtn');
+        const langMenu = $('#langMenu');
+        const form = document.querySelector('form');
+        const formStatus = $('#formStatus');
+        const year = $('#year');
 
-    if (skip) { showApp(); } else { setTimeout(showApp, 3000); }
+        year && (year.textContent = new Date().getFullYear());
 
-    function openLang(){
-      logo.classList.add('fadeout');
-      setTimeout(()=>{ lang.classList.add('show'); }, 120);
-    }
-    logo.addEventListener('click', openLang);
-    logo.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') openLang(); });
+        // Mobile nav
+        if (menuBtn && mobileNav) {
+          menuBtn.addEventListener('click', () => {
+            const open = mobileNav.classList.toggle('hidden') === false;
+            menuBtn.setAttribute('aria-expanded', String(open));
+          });
+        }
 
-    // Click language -> smooth transition:
-    lang.addEventListener('click', (e)=>{
-      const btn = e.target.closest('[data-lang]');
-      if(!btn) return;
+        // Lang menu
+        if (langBtn && langMenu) {
+          const toggle = (show) => {
+            langBtn.setAttribute('aria-expanded', String(show));
+            langMenu.classList.toggle('invisible', !show);
+            langMenu.classList.toggle('opacity-0', !show);
+          };
+          langBtn.addEventListener('click', () => toggle(langMenu.classList.contains('invisible')));
+          document.addEventListener('click', (e) => {
+            if (!langMenu.contains(e.target) && !langBtn.contains(e.target)) toggle(false);
+          });
+          langBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') { e.preventDefault(); toggle(true); langMenu.focus(); }
+          });
+          langMenu.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); toggle(false); langBtn.focus(); }
+          });
+        }
 
-      const chosen = btn.getAttribute('data-lang');
-      localStorage.setItem('evout_lang', chosen);
-      applyLang(chosen);
+        // Contact form (light, no backend). W Next: /api/mail lub provider.
+        if (form && formStatus) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            formStatus.hidden = false;
+            formStatus.textContent = 'Thanks! We will get back to you.';
+            form.reset();
+          });
+        }
+      })();
+    </script>
 
-      // 1) zacznij wygaszanie modala
-      lang.classList.add('fadeout');
-
-      // 2) w tym samym czasie przełącz motyw do jasnego (płynna zmiana tła i koloru)
-      document.body.classList.add('theme-light');
-
-      // 3) po zakończeniu fadeout modala — ukryj go, pokaż hero, potem fade-in hero
-      setTimeout(()=>{
-        lang.classList.remove('show','fadeout');
-        hero.classList.add('show');
-        // opóźnij minimalnie, by CSS transition mogło złapać stan początkowy
-        requestAnimationFrame(()=> hero.classList.add('visible'));
-      }, parseInt(getComputedStyle(lang).transitionDuration) * 1000 || 400);
-    });
-
-    const remembered = localStorage.getItem('evout_lang');
-    if (remembered) applyLang(remembered);
-  </script>
-</body>
+    <noscript>
+      <div class="mx-auto max-w-7xl p-4 text-sm text-red-700">
+        JavaScript is disabled. Some interactions may not work.
+      </div>
+    </noscript>
+  </body>
 </html>
-
-
-
-
