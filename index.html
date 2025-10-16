@@ -10,7 +10,6 @@
     <!-- Tailwind (CDN for prototype) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Tailwind minimal config (B/W only)
       tailwind.config = {
         darkMode: 'class',
         theme: {
@@ -32,10 +31,10 @@
         * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       }
 
-      /* Preloader SVG animation */
+      /* Preloader: lines/dots rising slowly */
       @keyframes rise {
-        0% { transform: translateY(100vh); opacity: 0.8; }
-        100% { transform: translateY(-110vh); opacity: 0.8; }
+        0% { transform: translateY(110vh); opacity: 0.8; }
+        100% { transform: translateY(-120vh); opacity: 0.8; }
       }
       .cosmic-line {
         animation-name: rise;
@@ -44,33 +43,44 @@
         will-change: transform;
       }
 
-      /* EVOUT pulsation */
+      /* EVOUT gentle drift during intro (takes full intro time) */
+      @keyframes driftUp {
+        0%   { transform: translateY(15vh) scale(0.985); opacity: 0.95; }
+        100% { transform: translateY(-10vh) scale(1);     opacity: 1; }
+      }
+      .evout-drift { animation: driftUp var(--intro-ms,5000ms) ease-in-out both; }
+
+      /* EVOUT pulsation (subtle) */
       @keyframes pulseSoft {
         0% { transform: scale(0.985); opacity: 0.95; }
         50% { transform: scale(1.0); opacity: 1; }
         100% { transform: scale(0.985); opacity: 0.95; }
       }
-      .evout-pulse { animation: pulseSoft 2.5s ease-in-out infinite; }
+      .evout-pulse { animation: pulseSoft 2.8s ease-in-out infinite; }
 
-      /* Slide up (intro → hero) */
+      /* Slide up fast on click */
       @keyframes slideUpAway {
         0% { transform: translateY(0); }
         100% { transform: translateY(-120%); }
       }
       .slide-up { animation: slideUpAway var(--slide-up-ms,700ms) cubic-bezier(.2,.8,.2,1) both; }
+
+      /* Nested accordion transitions */
+      .panel { max-height: 0; overflow: hidden; transition: max-height 500ms ease; }
+      .panel.open { max-height: var(--h, 1000px); }
     </style>
 
     <script>
-      // ====== CONFIG (easy to tweak) ======
+      // ====== CONFIG ======
       const APP_CONFIG = {
         INTRO_MS: 5000,          // total intro duration (preloader)
         SLIDE_UP_MS: 700,        // EVOUT slide-up on click
-        PULSE: true,             // EVOUT pulsation
+        PULSE: true,             // EVOUT pulsation during intro
         DEFAULT_LANG: 'en',      // en | de | pl | ru | ar
-        DOTS: 10,                // number of moving lines/dot-rows
+        DOTS: 12,                // number of moving lines
       };
 
-      // i18n dictionary (baseline EN)
+      // i18n dictionary
       const I18N = {
         en: {
           langName: "English",
@@ -84,7 +94,17 @@
           },
           branches: {
             root: "Business success",
-            a: { title: "Marketing", a1:"Werbetechnik (offline)", a2:"Digital media" },
+            a: { title: "Marketing",
+              a1:"Werbetechnik (offline)",
+              a2:"Digital media",
+              dm: {
+                gmb:"Google Business (reviews & profile)",
+                social:"Social media (posts & comments)",
+                email:"Email marketing",
+                video:"Promotional video",
+                photo:"Business photoshoot"
+              }
+            },
             b: { title: "Digitalization", b1:"Websites", b2:"SEO", b3:"AI Agent", b4:"Automations", b5:"Applications" },
             c: { title: "Strategy & Growth", c1:"Positioning", c2:"CRO & Analytics", c3:"Go-to-market" },
             more: "See details"
@@ -103,7 +123,7 @@
             email:"Email",
             message:"Project details",
             submit:"Send",
-            thanks:"Thanks! We will get back to you."
+            thanks:"Coming soon — email setup in progress. Your message was not sent."
           },
           footer: { privacy:"Privacy", terms:"Terms", email:"hello@evout.com" }
         },
@@ -119,7 +139,17 @@
           },
           branches: {
             root: "Geschäftserfolg",
-            a: { title: "Marketing", a1:"Werbetechnik (offline)", a2:"Digitale Medien" },
+            a: { title: "Marketing",
+              a1:"Werbetechnik (offline)",
+              a2:"Digitale Medien",
+              dm: {
+                gmb:"Google Business (Bewertungen & Profil)",
+                social:"Social Media (Posts & Kommentare)",
+                email:"E-Mail-Marketing",
+                video:"Werbevideo",
+                photo:"Business-Fotoshooting"
+              }
+            },
             b: { title: "Digitalisierung", b1:"Websites", b2:"SEO", b3:"KI-Agent", b4:"Automatisierungen", b5:"Applikationen" },
             c: { title: "Strategie & Wachstum", c1:"Positionierung", c2:"CRO & Analytics", c3:"Go-to-Market" },
             more: "Details ansehen"
@@ -138,7 +168,7 @@
             email:"E-Mail",
             message:"Projektdetails",
             submit:"Senden",
-            thanks:"Danke! Wir melden uns."
+            thanks:"Bald verfügbar — E-Mail wird eingerichtet. Ihre Nachricht wurde nicht gesendet."
           },
           footer: { privacy:"Datenschutz", terms:"AGB", email:"hello@evout.com" }
         },
@@ -154,7 +184,17 @@
           },
           branches: {
             root: "Sukces biznesu",
-            a: { title: "Marketing", a1:"Werbetechnik (offline)", a2:"Media digitalne" },
+            a: { title: "Marketing",
+              a1:"Werbetechnik (offline)",
+              a2:"Media digitalne",
+              dm: {
+                gmb:"Google Business (opinie i profil)",
+                social:"Social media (posty i komentarze)",
+                email:"E-mail marketing",
+                video:"Film promocyjny",
+                photo:"Sesja zdjęciowa"
+              }
+            },
             b: { title: "Digitalizacja", b1:"Strony WWW", b2:"SEO", b3:"Agent AI", b4:"Automatyzacje", b5:"Aplikacje" },
             c: { title: "Strategia i rozwój", c1:"Pozycjonowanie", c2:"CRO i analityka", c3:"Go-to-market" },
             more: "Zobacz szczegóły"
@@ -173,7 +213,7 @@
             email:"E-mail",
             message:"Szczegóły projektu",
             submit:"Wyślij",
-            thanks:"Dziękujemy! Odezwiemy się."
+            thanks:"Wkrótce dostępne — konfigurujemy e-mail. Wiadomość nie została wysłana."
           },
           footer: { privacy:"Prywatność", terms:"Regulamin", email:"hello@evout.com" }
         },
@@ -189,7 +229,17 @@
           },
           branches: {
             root: "Успех бизнеса",
-            a: { title: "Маркетинг", a1:"Werbetechnik (оффлайн)", a2:"Цифровые медиа" },
+            a: { title: "Маркетинг",
+              a1:"Werbetechnik (оффлайн)",
+              a2:"Цифровые медиа",
+              dm: {
+                gmb:"Google Business (отзывы и профиль)",
+                social:"Соцсети (посты и комментарии)",
+                email:"Email-маркетинг",
+                video:"Промо-видео",
+                photo:"Фотосессия для бизнеса"
+              }
+            },
             b: { title: "Цифровизация", b1:"Сайты", b2:"SEO", b3:"AI-агент", b4:"Автоматизация", b5:"Приложения" },
             c: { title: "Стратегия и рост", c1:"Позиционирование", c2:"CRO и аналитика", c3:"Go-to-market" },
             more: "Смотреть детали"
@@ -208,7 +258,7 @@
             email:"Email",
             message:"Детали проекта",
             submit:"Отправить",
-            thanks:"Спасибо! Мы свяжемся с вами."
+            thanks:"Скоро — настраиваем email. Сообщение не отправлено."
           },
           footer: { privacy:"Конфиденциальность", terms:"Условия", email:"hello@evout.com" }
         },
@@ -224,7 +274,17 @@
           },
           branches: {
             root: "نجاح الأعمال",
-            a: { title: "التسويق", a1:"Werbetechnik (أوفلاين)", a2:"وسائط رقمية" },
+            a: { title: "التسويق",
+              a1:"Werbetechnik (أوفلاين)",
+              a2:"وسائط رقمية",
+              dm: {
+                gmb:"ملف جوجل للأعمال (المراجعات والملف)",
+                social:"السوشيال (المنشورات والتعليقات)",
+                email:"البريد الإلكتروني التسويقي",
+                video:"فيديو ترويجي",
+                photo:"جلسة تصوير أعمال"
+              }
+            },
             b: { title: "التحول الرقمي", b1:"مواقع ويب", b2:"SEO", b3:"وكيل ذكاء اصطناعي", b4:"أتمتة", b5:"تطبيقات" },
             c: { title: "الاستراتيجية والنمو", c1:"التموضع", c2:"CRO وتحليلات", c3:"الذهاب إلى السوق" },
             more: "شاهد التفاصيل"
@@ -243,7 +303,7 @@
             email:"البريد الإلكتروني",
             message:"تفاصيل المشروع",
             submit:"إرسال",
-            thanks:"شكرًا لك! سنتواصل معك."
+            thanks:"قريبًا — يتم إعداد البريد. لم يتم إرسال رسالتك."
           },
           footer: { privacy:"الخصوصية", terms:"الشروط", email:"hello@evout.com" }
         }
@@ -251,7 +311,6 @@
     </script>
   </head>
   <body class="h-full font-sans selection:bg-white selection:text-black">
-    <!-- Skip to content -->
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white text-black px-3 py-2 rounded">
       Skip to content
     </a>
@@ -260,12 +319,11 @@
     <section id="intro" class="fixed inset-0 z-50 flex items-center justify-center bg-black" aria-label="Intro" aria-live="off">
       <!-- Moving lines / dots (SVG) -->
       <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <!-- vertical white thin lines + small dots moving upward -->
         <g id="lines"></g>
       </svg>
 
-      <!-- Huge EVOUT -->
-      <div id="evoutWrap" class="relative w-full flex items-end justify-center" style="height:70vh;">
+      <!-- Huge EVOUT (drifting slowly up during intro) -->
+      <div id="evoutWrap" class="relative w-full flex items-end justify-center evout-drift" style="height:70vh;">
         <button id="evoutBtn"
           class="evoutBtn text-white uppercase tracking-[0.15em] font-extrabold"
           style="font-size:clamp(3rem,12vw,18rem); line-height:0.9;"
@@ -293,7 +351,7 @@
           </ul>
         </nav>
 
-        <!-- Language switcher -->
+        <!-- Language -->
         <div class="flex items-center gap-2">
           <label for="lang" class="sr-only">Language</label>
           <select id="lang" class="bg-black border border-white/30 rounded-lg px-2 py-1 text-sm">
@@ -309,7 +367,7 @@
 
     <!-- MAIN -->
     <main id="main">
-      <!-- HERO (Prism / Branches) -->
+      <!-- HERO -->
       <section id="hero" class="relative overflow-hidden">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <header class="max-w-3xl">
@@ -333,11 +391,81 @@
                 <span class="text-xl font-semibold" data-i18n="branches.a.title">Marketing</span>
                 <span aria-hidden="true">+</span>
               </button>
-              <div id="branchA" class="branch-panel max-h-0 overflow-hidden transition-[max-height] duration-500 ease-out">
-                <ul class="mt-4 space-y-2 text-white/80">
-                  <li>• <span data-i18n="branches.a.a1">Werbetechnik (offline)</span> — signage, events, physical presence</li>
-                  <li>• <span data-i18n="branches.a.a2">Digital media</span> — social, email, reviews, promo video, photo</li>
-                </ul>
+
+              <div id="branchA" class="panel">
+                <!-- Level 2: Werbetechnik -->
+                <div class="mt-4 border-t border-white/10 pt-4">
+                  <button class="sub-branch-btn w-full text-left flex items-center justify-between gap-4 text-white/90" aria-expanded="false" aria-controls="branchA1">
+                    <span data-i18n="branches.a.a1">Werbetechnik (offline)</span>
+                    <span aria-hidden="true">+</span>
+                  </button>
+                  <div id="branchA1" class="panel">
+                    <ul class="mt-3 space-y-2 text-white/80">
+                      <li>• Signage & LED</li>
+                      <li>• Events & booths</li>
+                      <li>• Physical décor / POS</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Level 2: Digital media -->
+                <div class="mt-4 border-t border-white/10 pt-4">
+                  <button class="sub-branch-btn w-full text-left flex items-center justify-between gap-4 text-white/90" aria-expanded="false" aria-controls="branchA2">
+                    <span data-i18n="branches.a.a2">Digital media</span>
+                    <span aria-hidden="true">+</span>
+                  </button>
+                  <div id="branchA2" class="panel">
+                    <!-- Level 3: nested granular items -->
+                    <ul class="mt-3 divide-y divide-white/10">
+                      <li class="py-3">
+                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2gmb">
+                          <span data-i18n="branches.a.dm.gmb">Google Business (reviews & profile)</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
+                        <div id="leafA2gmb" class="panel">
+                          <p class="mt-2 text-white/70 text-sm">Setup & optimization, review responses, posts.</p>
+                        </div>
+                      </li>
+                      <li class="py-3">
+                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2social">
+                          <span data-i18n="branches.a.dm.social">Social media (posts & comments)</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
+                        <div id="leafA2social" class="panel">
+                          <p class="mt-2 text-white/70 text-sm">Publishing, community management, playbooks.</p>
+                        </div>
+                      </li>
+                      <li class="py-3">
+                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2email">
+                          <span data-i18n="branches.a.dm.email">Email marketing</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
+                        <div id="leafA2email" class="panel">
+                          <p class="mt-2 text-white/70 text-sm">Newsletters, automations, deliverability.</p>
+                        </div>
+                      </li>
+                      <li class="py-3">
+                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2video">
+                          <span data-i18n="branches.a.dm.video">Promotional video</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
+                        <div id="leafA2video" class="panel">
+                          <p class="mt-2 text-white/70 text-sm">Script, shoot, edit, short-form & ads.</p>
+                        </div>
+                      </li>
+                      <li class="py-3">
+                        <button class="leaf-btn w-full text-left flex items-center justify-between gap-4" aria-expanded="false" aria-controls="leafA2photo">
+                          <span data-i18n="branches.a.dm.photo">Business photoshoot</span>
+                          <span aria-hidden="true">+</span>
+                        </button>
+                        <div id="leafA2photo" class="panel">
+                          <p class="mt-2 text-white/70 text-sm">Brand, product, team — guidelines & sets.</p>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
                 <a href="#services" class="mt-4 inline-block text-sm underline opacity-80 hover:opacity-100" data-i18n="branches.more">See details</a>
               </div>
             </article>
@@ -348,7 +476,7 @@
                 <span class="text-xl font-semibold" data-i18n="branches.b.title">Digitalization</span>
                 <span aria-hidden="true">+</span>
               </button>
-              <div id="branchB" class="branch-panel max-h-0 overflow-hidden transition-[max-height] duration-500 ease-out">
+              <div id="branchB" class="panel">
                 <ul class="mt-4 space-y-2 text-white/80">
                   <li>• <span data-i18n="branches.b.b1">Websites</span> — fast, accessible, Next.js</li>
                   <li>• <span data-i18n="branches.b.b2">SEO</span> — technical & content</li>
@@ -366,7 +494,7 @@
                 <span class="text-xl font-semibold" data-i18n="branches.c.title">Strategy & Growth</span>
                 <span aria-hidden="true">+</span>
               </button>
-              <div id="branchC" class="branch-panel max-h-0 overflow-hidden transition-[max-height] duration-500 ease-out">
+              <div id="branchC" class="panel">
                 <ul class="mt-4 space-y-2 text-white/80">
                   <li>• <span data-i18n="branches.c.c1">Positioning</span> — ICP, messaging, offer</li>
                   <li>• <span data-i18n="branches.c.c2">CRO & Analytics</span> — A/B, funnels, GA4</li>
@@ -379,7 +507,7 @@
         </div>
       </section>
 
-      <!-- SERVICES (placeholder for later detail) -->
+      <!-- SERVICES -->
       <section id="services" class="border-t border-white/10">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
           <h2 class="text-2xl font-bold" data-i18n="services.title">Services</h2>
@@ -452,7 +580,7 @@
               <textarea name="message" rows="4" required class="rounded-xl border border-white/20 bg-black px-3 py-2"></textarea>
             </label>
             <button type="submit" class="mt-2 inline-flex justify-center rounded-xl border border-white px-4 py-2 font-medium hover:bg-white hover:text-black" data-i18n="contact.submit">Send</button>
-            <p class="text-xs text-white/60" aria-live="polite" id="formStatus" hidden></p>
+            <p class="text-xs text-white/70" aria-live="polite" id="formStatus" hidden></p>
           </form>
         </div>
       </section>
@@ -472,7 +600,7 @@
       </div>
     </footer>
 
-    <!-- JS: intro, branches, i18n -->
+    <!-- JS: intro, branches, nested panels, i18n, contact -->
     <script>
       (function () {
         const $ = (s, r = document) => r.querySelector(s);
@@ -487,19 +615,16 @@
         const setDir = (code) => {
           const rtl = code === 'ar';
           document.documentElement.dir = rtl ? 'rtl' : 'ltr';
-          // swap alignment subtly for RTL
           document.documentElement.lang = code;
         };
         function applyI18n(code) {
           const dict = I18N[code] || I18N[APP_CONFIG.DEFAULT_LANG];
-          // Text nodes
           $$("[data-i18n]").forEach(el => {
             const path = el.getAttribute("data-i18n").split('.');
             let cur = dict;
             for (const p of path) cur = cur?.[p];
             if (typeof cur === 'string') el.textContent = cur;
           });
-          // Skip intro label
           const skip = $('#skipIntro'); if (skip) skip.textContent = dict.skipIntro || 'Skip intro';
           setDir(code);
         }
@@ -514,7 +639,7 @@
           applyI18n(code);
         });
 
-        // ===== Preloader SVG generation =====
+        // ===== Preloader SVG generation (slower) =====
         const linesG = $('#lines');
         const DOTS = Math.max(3, APP_CONFIG.DOTS|0);
         const intro = $('#intro');
@@ -523,26 +648,31 @@
         const skipBtn = $('#skipIntro');
         const HERO = $('#hero');
 
+        // set drift duration to intro time
+        evoutWrap?.style.setProperty('--intro-ms', (prefersReduced ? 300 : APP_CONFIG.INTRO_MS) + 'ms');
+
         if (linesG) {
           for (let i = 0; i < DOTS; i++) {
-            const x = 5 + i * (90 / (DOTS - 1)); // spread across width (5..95)
-            const speed = 3000 + (i % 5) * 500;  // staggered speeds
+            const x = 5 + i * (90 / (DOTS - 1)); // 5..95 evenly
+            const base = 8000;      // 8s
+            const jitter = 6000;    // + up to 6s
+            const dur = prefersReduced ? 300 : base + Math.floor(Math.random() * jitter);
+            const delay = (i % 4) * 250;
+
             const group = document.createElementNS('http://www.w3.org/2000/svg','g');
             group.setAttribute('class', 'cosmic-line');
-            group.style.animationDuration = prefersReduced ? '300ms' : `${speed}ms`;
-            group.style.animationDelay = `${(i%3)*150}ms`;
+            group.style.animationDuration = dur + 'ms';
+            group.style.animationDelay = delay + 'ms';
 
-            // thin line
             const line = document.createElementNS('http://www.w3.org/2000/svg','line');
             line.setAttribute('x1', x); line.setAttribute('x2', x);
             line.setAttribute('y1', '0'); line.setAttribute('y2', '100');
             line.setAttribute('stroke', 'white'); line.setAttribute('stroke-width', '0.2');
             line.setAttribute('stroke-opacity', '0.25');
 
-            // small dot
             const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
             dot.setAttribute('cx', x);
-            dot.setAttribute('cy', '50');
+            dot.setAttribute('cy', String(20 + Math.random()*60));
             dot.setAttribute('r', '0.8');
             dot.setAttribute('fill', 'white');
 
@@ -552,9 +682,11 @@
           }
         }
 
-        // EVOUT pulse toggle by config + reduce motion
+        // EVOUT pulse (subtle)
+        if (evoutBtn && !prefersReduced && APP_CONFIG.PULSE) evoutBtn.classList.add('evout-pulse');
+
+        // Click → slide up fast
         if (evoutBtn) {
-          if (!prefersReduced && APP_CONFIG.PULSE) evoutBtn.classList.add('evout-pulse');
           evoutBtn.addEventListener('click', goToHero);
           evoutBtn.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToHero(); }
@@ -576,7 +708,6 @@
           clearTimeout(introTimer);
           if (!intro) return;
           intro.classList.add('hidden');
-          // ensure hero is visible for non-click path
           HERO?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
         }
 
@@ -587,24 +718,46 @@
           setTimeout(endIntroNow, prefersReduced ? 0 : APP_CONFIG.SLIDE_UP_MS);
         }
 
-        // ===== Branches (expand/collapse) =====
-        $$('.branch-btn').forEach(btn => {
-          const panel = $('#' + btn.getAttribute('aria-controls'));
-          btn.addEventListener('click', () => togglePanel(btn, panel));
-          btn.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePanel(btn, panel); }
+        // ===== Accordions (3 levels) =====
+        function bindAccordion(selector) {
+          $$(selector).forEach(btn => {
+            const panel = document.getElementById(btn.getAttribute('aria-controls'));
+            const toggle = () => {
+              const expanded = btn.getAttribute('aria-expanded') === 'true';
+              btn.setAttribute('aria-expanded', String(!expanded));
+              if (!panel) return;
+              if (!expanded) {
+                panel.classList.add('open');
+                panel.style.setProperty('--h', panel.scrollHeight + 'px');
+              } else {
+                panel.style.setProperty('--h', panel.scrollHeight + 'px'); // set current height to animate from
+                // force reflow
+                void panel.offsetHeight;
+                panel.classList.remove('open');
+              }
+            };
+            btn.addEventListener('click', toggle);
+            btn.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+            });
           });
-        });
+        }
+        bindAccordion('.branch-btn');
+        bindAccordion('.sub-branch-btn');
+        bindAccordion('.leaf-btn');
 
-        function togglePanel(btn, panel) {
-          const expanded = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', String(!expanded));
-          if (!panel) return;
-          if (expanded) {
-            panel.style.maxHeight = '0px';
-          } else {
-            panel.style.maxHeight = panel.scrollHeight + 'px';
-          }
+        // ===== Contact form (light) — "Coming soon" =====
+        const form = document.querySelector('form');
+        const formStatus = $('#formStatus');
+        if (form && formStatus) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const lang = document.documentElement.lang || 'en';
+            const dict = I18N[lang] || I18N.en;
+            formStatus.hidden = false;
+            formStatus.textContent = dict.contact?.thanks || 'Coming soon — email setup in progress. Your message was not sent.';
+            form.reset();
+          });
         }
       })();
     </script>
