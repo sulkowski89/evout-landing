@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <title>EVOUT – gradient wave</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <title>EVOUT – Light Grid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     html, body {
       height: 100%;
@@ -12,40 +13,33 @@
       overflow: hidden;
     }
 
-    /* Warstwa fali */
-    .wave {
+    .grid {
       position: fixed;
       inset: 0;
-      /* Dwie nakładające się, miękkie białe „smugi” na czarnym tle */
-      background:
-        radial-gradient(1200px 350px at 0% 50%, rgba(255,255,255,0.18), rgba(255,255,255,0) 60%) ,
-        radial-gradient(900px 260px  at 30% 55%, rgba(255,255,255,0.10), rgba(255,255,255,0) 60%);
-      background-repeat: no-repeat;
-      background-size: 200% 100%, 200% 100%;
-      animation: drift1 22s linear infinite, drift2 28s linear infinite;
-      will-change: background-position;
-      /* Opcjonalnie lekki blur, by zmiękczyć krawędzie */
-      filter: blur(0.4px);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: moveGrid 30s linear infinite;
     }
 
-    @keyframes drift1 {
-      0%   { background-position: 0% 0, 0 0; }
-      50%  { background-position: 100% 0, 0 0; }
-      100% { background-position: 0% 0, 0 0; }
-    }
-    @keyframes drift2 {
-      0%   { background-position: 0 0, 100% 0; }
-      50%  { background-position: 0 0, 0% 0; }
-      100% { background-position: 0 0, 100% 0; }
+    @keyframes moveGrid {
+      0%   { background-position: 0 0; }
+      100% { background-position: 240px 240px; }
     }
 
-    /* Szacunek dla prefers-reduced-motion */
-    @media (prefers-reduced-motion: reduce) {
-      .wave { animation: none; }
+    /* Subtelne rozmycie dla „glow” efektu */
+    .grid::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      filter: blur(2px);
+      opacity: 0.5;
     }
   </style>
 </head>
 <body>
-  <div class="wave" aria-hidden="true"></div>
+  <div class="grid"></div>
 </body>
 </html>
