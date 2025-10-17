@@ -17,17 +17,17 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
       background-size: 60px 60px;          /* kafelek 60×60 */
-      animation: moveGrid 15s linear infinite;
+      animation: moveGrid 30s linear infinite;
       will-change: background-position;
     }
 
     /* Klucz: przesuwamy o dokładnie 60px w poziomie i -60px w pionie */
     @keyframes moveGrid {
       0%   { background-position:   0px    0px,   0px    0px; }
-      100% { background-position:  60px  -60px,  60px  -60px; }
+      100% { background-position:  120px  -120px,  120px  -120px; }
     }
 
     .grid::after {
@@ -36,7 +36,7 @@
       inset: 0;
       background: inherit;
       filter: blur(2px);
-      opacity: 0.7;
+      opacity: 0.5;
       pointer-events: none;
     }
   </style>
@@ -45,4 +45,3 @@
   <div class="grid"></div>
 </body>
 </html>
-
