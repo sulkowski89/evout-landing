@@ -4,85 +4,84 @@
   <meta charset="utf-8" />
   <title>EVOUT — Smart Web & Automations</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="EVOUT builds fast, modern websites and lightweight automations that actually sell." />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg: #000; --fg:#fff; --muted:#a1a1aa; --accent:#00ff99;
-      --font:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      --container:1200px; --lh:1.5; --h1:clamp(2rem,5vw,4rem); --h2:clamp(1.125rem,2.2vw,1.4rem);
-      --space-2:1rem; --space-3:1.5rem; --space-4:2rem;
-      /* grid */
-      --grid-size:30px; --line:rgba(255,255,255,.1); --blur:2px; --speed:12s;
+      --bg:#000; --fg:#fff; --muted:#a1a1aa; --accent:#00ff99;
+      --font: system-ui,-apple-system,Segoe UI,Inter,Roboto,sans-serif;
+      --container:1200px; --lh:1.5; --h1:clamp(2.4rem,6vw,4.6rem); --h2:clamp(1.1rem,2.2vw,1.4rem);
+      --s2:1rem; --s3:1.5rem; --s4:2rem;
+      --grid:30px; --line:rgba(255,255,255,.14); --blur:2px; --speed:12s;
     }
-
     html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);color-scheme:dark}
     body{font-family:var(--font);line-height:var(--lh);overflow-x:hidden}
 
-    /* BACKGROUND GRID */
-    .bg{position:fixed;inset:0;z-index:-2;
+    /* GRID BACKGROUND (nieco jaśniejszy, by było widać pod hero) */
+    .bg{position:fixed;inset:0;z-index:-3;
       background-image:
-        repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid-size)),
-        repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid-size));
-      background-size:var(--grid-size) var(--grid-size),var(--grid-size) var(--grid-size);
-      animation:drift var(--speed) linear infinite; will-change:background-position
+        repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid)),
+        repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid));
+      background-size:var(--grid) var(--grid),var(--grid) var(--grid);
+      animation:drift var(--speed) linear infinite; will-change:background-position;
     }
     .bg::after{content:"";position:absolute;inset:0;background:inherit;filter:blur(var(--blur));opacity:.5;pointer-events:none}
     @keyframes drift{
       0%{background-position:0 0,0 0}
-      100%{background-position:var(--grid-size) calc(-1 * var(--grid-size)),
-                                 var(--grid-size) calc(-1 * var(--grid-size))}
+      100%{background-position:var(--grid) calc(-1*var(--grid)),var(--grid) calc(-1*var(--grid))}
     }
-    @media (prefers-reduced-motion:reduce){.bg{animation:none}}
 
-    /* NAV with smooth blur + overlay fade */
+    /* NAV — wyraźniejsze, płynne wejście rozmycia + przyciemnienia */
     .nav{
-      position:sticky; top:0; left:0; right:0; z-index:10;
+      position:sticky; top:0; z-index:20;
       display:flex; align-items:center; justify-content:space-between;
-      padding:.75rem 1rem;
+      padding:.8rem 1rem;
       backdrop-filter:blur(0px);
-      transition:backdrop-filter .35s ease;
+      transition:backdrop-filter .5s ease;
     }
     .nav::before{
       content:""; position:absolute; inset:0; pointer-events:none;
-      background:linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,0));
-      opacity:0; transition:opacity .35s ease;
+      background:linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,0));
+      opacity:0; transition:opacity .5s ease;
     }
-    .scrolled .nav{ backdrop-filter:blur(8px) }
+    .scrolled .nav{ backdrop-filter:blur(16px) }
     .scrolled .nav::before{ opacity:1 }
-
     .brand{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem}
     .ghost{color:var(--muted);text-decoration:none;padding:.5rem .75rem;border-radius:8px}
-    .ghost:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,255,153,.35)}
 
-    /* HERO */
-    .container{max-width:var(--container);margin-inline:auto;padding:min(6vh,var(--space-4)) var(--space-2)}
-    .hero{min-height:100dvh;display:grid;place-items:center;position:relative;text-align:center}
-    .stack{display:flex;flex-direction:column;gap:var(--space-3);align-items:center}
+    /* LAYOUT */
+    .container{max-width:var(--container);margin-inline:auto;padding:min(6vh,var(--s4)) var(--s2)}
+    .hero{min-height:120dvh;display:grid;place-items:center;position:relative;text-align:center;isolation:isolate}
 
-    /* HERO MEDIA LAYER that fades to transparent downward */
+    /* HERO MEDIA: poświata + (opcjonalnie) obraz, zanik ku dołowi */
     .hero-media{
       position:absolute; inset:0; z-index:-1;
-      /* Placeholder: pure black. Replace with an image when ready */
-      background:#000 center/cover no-repeat;
-      /* fade bottom → transparent so grid shows through */
-      -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%);
-              mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%);
+      background:
+        radial-gradient(80% 55% at 50% 0%, rgba(255,255,255,.10), rgba(255,255,255,0) 60%),
+        /* podmień poniższą linię, gdy dodasz grafikę */
+        linear-gradient(#050505, #050505);
+      background-blend-mode:screen, normal;
+      /* Maska: pełna widoczność u góry, przejście do transparentu niżej */
+      -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 85%);
+              mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 85%);
     }
-    /* If you want a cosmos image later, just set: background-image:url('cosmos.jpg'); */
+    /* Gdy będziesz mieć kosmos: background:
+         radial-gradient(80% 55% at 50% 0%, rgba(255,255,255,.10), rgba(255,255,255,0) 60%),
+         url('cosmos.jpg') center/cover no-repeat;  */
 
-    h1{font-weight:700;font-size:var(--h1);letter-spacing:-.02em;margin:0}
-    p.lead{font-weight:300;font-size:var(--h2);color:var(--muted);margin:0;max-width:60ch}
+    .stack{display:flex;flex-direction:column;gap:var(--s3);align-items:center}
+    h1{margin:0;font-weight:800;font-size:var(--h1);letter-spacing:-.02em}
+    .lead{margin:0;max-width:60ch;color:var(--muted);font-weight:300;font-size:var(--h2)}
 
     .cta{
-      display:inline-block;margin-top:var(--space-3);padding:.9rem 1.25rem;border-radius:16px;
-      background:var(--accent);color:#001b12;font-weight:700;text-decoration:none;
-      box-shadow:0 10px 30px rgba(0,0,0,.6); transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease
+      display:inline-block;margin-top:var(--s3);padding:.95rem 1.25rem;border-radius:16px;
+      background:var(--accent);color:#001b12;font-weight:800;text-decoration:none;
+      box-shadow:0 10px 30px rgba(0,0,0,.6);
+      transition:transform .2s ease,opacity .2s ease;
     }
     .cta:hover{transform:translateY(-2px)}
     .cta:active{transform:translateY(0);opacity:.9}
-    .cta:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,255,153,.35)}
+
+    /* Dodatkowa sekcja by od razu zobaczyć scroll/blur */
+    .section{min-height:140dvh;display:grid;place-items:center}
   </style>
 </head>
 <body>
@@ -96,24 +95,23 @@
   <main class="container hero">
     <div class="hero-media" aria-hidden="true"></div>
     <div class="stack">
-      <h1>Smart Web & lightweight automations</h1>
-      <p class="lead">We build fast, modern websites with measurable impact, integrated with the tools you already use.</p>
-      <a class="cta" href="#contact">Start a project</a>
+      <h1>EVOUT - Marketing & IT Solutions</h1>
+      <p class="lead">Comming soon</p>
+      <a class="cta" href="#contact">Start</a>
     </div>
   </main>
 
-  <section id="contact" class="container" style="padding-block:30vh">
-    <p class="lead">Contact section goes here.</p>
+  <section id="contact" class="container section">
+    <p class="lead">Scroll here to feel the nav blur and see the grid clearly below the hero.</p>
   </section>
 
   <script>
-    // add/remove .scrolled on <html> for smooth nav transitions
+    // Płynne przejście stanu nawigacji
     const onScroll = () => {
-      if (window.scrollY > 4) document.documentElement.classList.add('scrolled');
-      else document.documentElement.classList.remove('scrolled');
+      document.documentElement.classList.toggle('scrolled', window.scrollY > 8);
     };
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('scroll', onScroll, { passive: true });
   </script>
 </body>
 </html>
