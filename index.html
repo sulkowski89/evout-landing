@@ -7,104 +7,100 @@
   <meta name="description" content="EVOUT — Marketing & IT Solutions" />
   <style>
     :root{
-      --bg:#000;
       --fg:#fff;
       --accent:#00ff99;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
-      --grid-size:30px;
-      --line:rgba(255,255,255,.1);
-      --blur:2px;
-      --speed:12s;
+      --grid-size:30px;                 /* rozmiar kratki */
+      --line:rgba(255,255,255,.10);     /* kolor linii */
+      --blur:2px;                       /* subtelny glow */
+      --speed:12s;                      /* prędkość ruchu */
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;background:var(--bg);color:var(--fg);font-family:var(--font);overflow:hidden}
 
-    /* ruchomy grid */
+    html, body{
+      height:100%;
+      background: transparent;          /* ważne: nie przykrywamy tła siatki */
+      color: var(--fg);
+      font-family: var(--font);
+      overflow-x:hidden;                /* pozwól scroll w pionie */
+    }
+
+    /* RUCHOMA KRATKA W TLE */
     .bg{
-      position:fixed;inset:0;z-index:-2;
+      position: fixed; inset: 0; z-index: -2;
       background-image:
-        repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid-size)),
-        repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid-size));
-      background-size:var(--grid-size) var(--grid-size),var(--grid-size) var(--grid-size);
+        repeating-linear-gradient(0deg,  var(--line) 0 1px, transparent 1px var(--grid-size)),
+        repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid-size));
+      background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
       animation: drift var(--speed) linear infinite;
       will-change: background-position;
     }
     .bg::after{
-      content:"";
-      position:absolute;inset:0;
-      background:inherit;
-      filter:blur(var(--blur));
-      opacity:.5;
-      pointer-events:none;
+      content:""; position:absolute; inset:0;
+      background: inherit; filter: blur(var(--blur)); opacity:.5; pointer-events:none;
     }
     @keyframes drift{
-      0%{background-position:0 0,0 0}
-      100%{background-position:var(--grid-size) calc(-1 * var(--grid-size)),
-                                 var(--grid-size) calc(-1 * var(--grid-size))}
+      0%   { background-position: 0 0, 0 0; }
+      100% { background-position: var(--grid-size) calc(-1 * var(--grid-size)),
+                                   var(--grid-size) calc(-1 * var(--grid-size)); }
     }
 
-    /* login */
+    /* GÓRNY PASEK Z LOGINEM */
     header{
-      position:fixed;
-      top:0; right:0; left:0;
-      display:flex; justify-content:flex-end;
-      padding:1rem 1.5rem;
-      z-index:10;
+      position: sticky; top: 0; z-index: 5;
+      display: flex; justify-content: flex-end; gap: .75rem;
+      padding: 1rem 1.25rem;
+      /* delikatny blur tylko jako szum, nic nie zakrywa */
+      backdrop-filter: blur(2px);
     }
     .login-btn{
-      background:transparent;
-      color:var(--fg);
-      border:1px solid var(--accent);
-      padding:.5rem 1rem;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:.9rem;
-      transition:background .2s ease, color .2s ease;
+      background: transparent; color: var(--fg);
+      border: 1px solid var(--accent);
+      padding: .5rem 1rem; border-radius: 8px; cursor: pointer; font-size: .9rem;
+      transition: background .2s ease, color .2s ease;
     }
-    .login-btn:hover{
-      background:var(--accent);
-      color:#001b12;
-    }
+    .login-btn:hover{ background: var(--accent); color: #001b12; }
 
-    /* hero + overlay */
+    /* HERO */
     .hero{
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      position:relative;
-      padding:0 1rem;
-      z-index:5;
+      min-height: 100vh;                /* pełny ekran */
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      text-align:center; position:relative; padding: 0 1rem;
     }
+    /* Overlay tylko pod tekstem: przepuszcza boki i dół */
     .hero-overlay{
-      position:absolute;
-      inset:0;
-      z-index:-1;
+      position:absolute; inset:0; z-index:-1; pointer-events:none;
       background: radial-gradient(
-        circle at center,
-        rgba(0,0,0,0.8) 0%,
-        rgba(0,0,0,0.6) 40%,
-        rgba(0,0,0,0) 100%
+        70% 50% at 50% 40%,
+        rgba(0,0,0,0.40) 0%,
+        rgba(0,0,0,0.20) 45%,
+        rgba(0,0,0,0.00) 100%
       );
     }
 
     h1{
-      font-size:clamp(3rem,10vw,6rem);
-      font-weight:800;
-      letter-spacing:.05em;
-      margin-bottom:1rem;
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 800; letter-spacing: .05em; margin-bottom: 1rem;
     }
     h2{
-      font-size:clamp(1.2rem,3vw,2rem);
-      font-weight:300;
-      color:var(--accent);
-      margin-bottom:.75rem;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      font-weight: 300; color: var(--accent); margin-bottom: .75rem;
     }
-    p{
-      font-size:clamp(.9rem,2vw,1.2rem);
-      color:#aaa;
+    p.lead{
+      font-size: clamp(.95rem, 2.2vw, 1.2rem);
+      color: #b3b3b3;
+    }
+
+    /* DODATKOWA SEKCJA, BY MÓC PRZEWINĄĆ I ZOBACZYĆ KRATKĘ */
+    .below{
+      min-height: 120vh;                /* ekstra przestrzeń do scrolla */
+      display:grid; place-items:center; padding: 2rem; text-align:center;
+    }
+    .note{
+      max-width: 60ch; color:#cfcfcf;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; padding: 1rem 1.25rem;
     }
   </style>
 </head>
@@ -115,14 +111,23 @@
     <button class="login-btn" id="loginBtn">Login</button>
   </header>
 
-  <main class="hero">
-    <div class="hero-overlay" aria-hidden="true"></div>
-    <h1>EVOUT</h1>
-    <h2>Marketing & IT Solutions</h2>
-    <p>Coming soon</p>
+  <main>
+    <section class="hero">
+      <div class="hero-overlay" aria-hidden="true"></div>
+      <h1>EVOUT</h1>
+      <h2>Marketing & IT Solutions</h2>
+      <p class="lead">Coming soon</p>
+    </section>
+
+    <section class="below">
+      <div class="note">
+        <p>Scroll area — tutaj kratka jest w pełni widoczna. Możesz zostawić tę sekcję jako placeholder albo ją usunąć, gdy dodamy kolejne moduły.</p>
+      </div>
+    </section>
   </main>
 
   <script>
+    // prosty gate do /workspace (dev, nieprodukcyjny)
     document.getElementById('loginBtn').addEventListener('click', () => {
       const pwd = prompt('Enter password:');
       if (pwd === null) return;
