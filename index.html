@@ -9,90 +9,80 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      /* Colors */
-      --bg: #000;
-      --fg: #fff;
-      --muted: #a1a1aa;           /* neutral-400 */
-      --accent: #00ff99;          /* brand accent */
-      /* Type scale */
-      --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      --leading: 1.5;
-      --h1: clamp(2rem, 5vw, 4rem);
-      --h2: clamp(1.25rem, 2.5vw, 1.5rem);
-      /* Layout */
-      --container: 1200px;
-      --space-1: .5rem;
-      --space-2: 1rem;
-      --space-3: 1.5rem;
-      --space-4: 2rem;
-      /* Grid bg */
-      --grid-size: 30px;
-      --line: rgba(255,255,255,.10);
-      --blur: 2px;
-      --speed: 12s;
-      /* Effects */
-      --radius: 16px;
-      --shadow: 0 10px 30px rgba(0,0,0,.6);
-      --focus: 0 0 0 3px rgba(0,255,153,.35);
+      --bg: #000; --fg:#fff; --muted:#a1a1aa; --accent:#00ff99;
+      --font:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      --container:1200px; --lh:1.5; --h1:clamp(2rem,5vw,4rem); --h2:clamp(1.125rem,2.2vw,1.4rem);
+      --space-2:1rem; --space-3:1.5rem; --space-4:2rem;
+      /* grid */
+      --grid-size:30px; --line:rgba(255,255,255,.1); --blur:2px; --speed:12s;
     }
 
-    html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); color-scheme:dark; }
-    body { font-family: var(--font-body); line-height: var(--leading); }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);color-scheme:dark}
+    body{font-family:var(--font);line-height:var(--lh);overflow-x:hidden}
 
-    /* Background grid (Twoja baza – unowocześniona) */
-    .bg {
-      position: fixed; inset: 0; z-index:-1;
+    /* BACKGROUND GRID */
+    .bg{position:fixed;inset:0;z-index:-2;
       background-image:
-        repeating-linear-gradient(  0deg, var(--line) 0 1px, transparent 1px var(--grid-size)),
-        repeating-linear-gradient( 90deg, var(--line) 0 1px, transparent 1px var(--grid-size));
-      background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
-      animation: drift var(--speed) linear infinite;
-      will-change: background-position;
+        repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid-size)),
+        repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid-size));
+      background-size:var(--grid-size) var(--grid-size),var(--grid-size) var(--grid-size);
+      animation:drift var(--speed) linear infinite; will-change:background-position
     }
-    .bg::after { content:""; position:absolute; inset:0; background:inherit; filter:blur(var(--blur)); opacity:.5; pointer-events:none; }
+    .bg::after{content:"";position:absolute;inset:0;background:inherit;filter:blur(var(--blur));opacity:.5;pointer-events:none}
     @keyframes drift{
-      0% { background-position: 0 0, 0 0; }
-      100% { background-position: var(--grid-size) calc(-1 * var(--grid-size)),
-                                   var(--grid-size) calc(-1 * var(--grid-size)); }
+      0%{background-position:0 0,0 0}
+      100%{background-position:var(--grid-size) calc(-1 * var(--grid-size)),
+                                 var(--grid-size) calc(-1 * var(--grid-size))}
     }
-    @media (prefers-reduced-motion: reduce){ .bg{ animation:none; } }
+    @media (prefers-reduced-motion:reduce){.bg{animation:none}}
 
-    /* Container */
-    .container { max-width: var(--container); margin-inline:auto; padding: min(6vh, var(--space-4)) var(--space-2); }
-
-    /* Hero */
-    .hero { min-height: 100dvh; display:grid; place-items:center; text-align:center; }
-    .stack { display:flex; flex-direction:column; gap: var(--space-3); align-items:center; }
-
-    h1 { font-weight:700; font-size: var(--h1); letter-spacing:-0.02em; margin:0; }
-    p.lead { font-weight:300; font-size: var(--h2); color: var(--muted); margin:0; max-width: 60ch; }
-
-    .cta {
-      display:inline-block;
-      margin-top: var(--space-3);
-      padding: .9rem 1.25rem;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #001b12; /* dark text on neon */
-      font-weight: 700;
-      text-decoration: none;
-      box-shadow: var(--shadow);
-      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    /* NAV with smooth blur + overlay fade */
+    .nav{
+      position:sticky; top:0; left:0; right:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.75rem 1rem;
+      backdrop-filter:blur(0px);
+      transition:backdrop-filter .35s ease;
     }
-    .cta:hover { transform: translateY(-2px); }
-    .cta:active { transform: translateY(0); opacity:.9; }
-    .cta:focus-visible { outline: none; box-shadow: var(--focus); }
-
-    /* Optional: subtle top nav placeholder for później */
-    .nav {
-      position: fixed; top: 0; left: 0; right: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .75rem 1rem; backdrop-filter: blur(6px);
-      background: linear-gradient(to bottom, rgba(0,0,0,.6), transparent);
+    .nav::before{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background:linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,0));
+      opacity:0; transition:opacity .35s ease;
     }
-    .brand { font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:.9rem; }
-    .ghost { color: var(--muted); text-decoration: none; padding:.5rem .75rem; border-radius:8px; }
-    .ghost:focus-visible { outline:none; box-shadow: var(--focus); }
+    .scrolled .nav{ backdrop-filter:blur(8px) }
+    .scrolled .nav::before{ opacity:1 }
+
+    .brand{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem}
+    .ghost{color:var(--muted);text-decoration:none;padding:.5rem .75rem;border-radius:8px}
+    .ghost:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,255,153,.35)}
+
+    /* HERO */
+    .container{max-width:var(--container);margin-inline:auto;padding:min(6vh,var(--space-4)) var(--space-2)}
+    .hero{min-height:100dvh;display:grid;place-items:center;position:relative;text-align:center}
+    .stack{display:flex;flex-direction:column;gap:var(--space-3);align-items:center}
+
+    /* HERO MEDIA LAYER that fades to transparent downward */
+    .hero-media{
+      position:absolute; inset:0; z-index:-1;
+      /* Placeholder: pure black. Replace with an image when ready */
+      background:#000 center/cover no-repeat;
+      /* fade bottom → transparent so grid shows through */
+      -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%);
+              mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%);
+    }
+    /* If you want a cosmos image later, just set: background-image:url('cosmos.jpg'); */
+
+    h1{font-weight:700;font-size:var(--h1);letter-spacing:-.02em;margin:0}
+    p.lead{font-weight:300;font-size:var(--h2);color:var(--muted);margin:0;max-width:60ch}
+
+    .cta{
+      display:inline-block;margin-top:var(--space-3);padding:.9rem 1.25rem;border-radius:16px;
+      background:var(--accent);color:#001b12;font-weight:700;text-decoration:none;
+      box-shadow:0 10px 30px rgba(0,0,0,.6); transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease
+    }
+    .cta:hover{transform:translateY(-2px)}
+    .cta:active{transform:translateY(0);opacity:.9}
+    .cta:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(0,255,153,.35)}
   </style>
 </head>
 <body>
@@ -104,6 +94,7 @@
   </header>
 
   <main class="container hero">
+    <div class="hero-media" aria-hidden="true"></div>
     <div class="stack">
       <h1>Smart Web & lightweight automations</h1>
       <p class="lead">We build fast, modern websites with measurable impact, integrated with the tools you already use.</p>
@@ -111,9 +102,18 @@
     </div>
   </main>
 
-  <!-- Placeholder sekcji kontaktu – do wypełnienia później -->
-  <section id="contact" class="container" style="padding-block: 30vh;">
+  <section id="contact" class="container" style="padding-block:30vh">
     <p class="lead">Contact section goes here.</p>
   </section>
+
+  <script>
+    // add/remove .scrolled on <html> for smooth nav transitions
+    const onScroll = () => {
+      if (window.scrollY > 4) document.documentElement.classList.add('scrolled');
+      else document.documentElement.classList.remove('scrolled');
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  </script>
 </body>
 </html>
