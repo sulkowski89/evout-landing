@@ -56,17 +56,17 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      text-align: center;
-      padding: 0 1rem;
     }
 
     h1 {
+      width: 70vw;                 /* dokładnie 70% szerokości ekranu */
+      text-align: center;
       font-size: clamp(3rem, 10vw, 8rem);
       font-weight: 800;
-      max-width: 70vw; /* ← szerokość 70% ekranu */
       line-height: 1.1;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      white-space: nowrap;        /* zapobiega łamaniu napisu */
     }
   </style>
 </head>
