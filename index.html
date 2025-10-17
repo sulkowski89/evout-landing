@@ -2,91 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Template – Dark Base</title>
+  <title>EVOUT — Marketing & IT Solutions</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="EVOUT — Marketing & IT Solutions for your business. Coming soon." />
   <style>
-    :root {
-      --bg: #000;
-      --fg: #fff;
-      --accent: #00ff99;
-      --font: system-ui, sans-serif;
-      --line: rgba(255,255,255,0.1);
-      --grid-size: 30px;
+    :root{
+      --bg:#000; --fg:#fff; --muted:#a1a1aa; --accent:#00ff99;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+      --container:1200px; --lh:1.5;
+      --h1:clamp(2rem,5vw,4rem); --h2:clamp(1.125rem,2.2vw,1.4rem);
+      --space-2:1rem; --space-3:1.5rem; --space-4:2rem;
+      --grid-size:30px; --line:rgba(255,255,255,.1); --blur:2px; --speed:12s;
+      --radius:16px; --focus:0 0 0 3px rgba(0,255,153,.35);
     }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);color-scheme:dark}
+    body{font-family:var(--font);line-height:var(--lh);overflow-x:hidden}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
-    .bg {
-      position: fixed; inset: 0;
+    /* Background grid */
+    .bg{position:fixed;inset:0;z-index:-1;
       background-image:
-        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px var(--grid-size)),
-        repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid-size));
-      background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
-      animation: drift 12s linear infinite;
+        repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid-size)),
+        repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid-size));
+      background-size:var(--grid-size) var(--grid-size),var(--grid-size) var(--grid-size);
+      animation:drift var(--speed) linear infinite; will-change:background-position;
     }
-    @keyframes drift {
-      0% { background-position: 0 0, 0 0; }
-      100% { background-position: var(--grid-size) calc(-1 * var(--grid-size)),
-                             var(--grid-size) calc(-1 * var(--grid-size)); }
+    .bg::after{content:"";position:absolute;inset:0;background:inherit;filter:blur(var(--blur));opacity:.5;pointer-events:none}
+    @keyframes drift{
+      0%{background-position:0 0,0 0}
+      100%{background-position:var(--grid-size) calc(-1 * var(--grid-size)),
+                                 var(--grid-size) calc(-1 * var(--grid-size))}
     }
+    @media (prefers-reduced-motion:reduce){.bg{animation:none}}
 
-    .container {
-      position: relative;
-      max-width: 1200px; margin: auto;
-      padding: 2rem;
+    /* Layout */
+    .container{max-width:var(--container);margin-inline:auto;padding:min(6vh,var(--space-4)) var(--space-2)}
+    .hero{min-height:100dvh;display:grid;place-items:center;text-align:center}
+    .stack{display:flex;flex-direction:column;gap:var(--space-3);align-items:center}
+
+    h1{margin:0;font-weight:700;font-size:var(--h1);letter-spacing:-.02em}
+    p.lead{margin:0;font-weight:300;font-size:var(--h2);color:var(--muted);max-width:60ch}
+
+    .cta{
+      display:inline-block;margin-top:var(--space-3);padding:.9rem 1.25rem;border-radius:var(--radius);
+      background:var(--accent);color:#001b12;font-weight:700;text-decoration:none;border:0;cursor:pointer;
+      transition:transform .18s ease, opacity .18s ease, box-shadow .18s ease;
     }
-    header {
-      position: fixed; top: 0; width: 100%;
-      padding: 1rem;
-      display: flex; justify-content: space-between; align-items: center;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-    }
-    header a { color: var(--fg); text-decoration: none; }
-    .hero {
-      height: 100vh; display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      text-align: center; padding-top: 4rem;
-    }
-    .hero h1 {
-      font-size: 3rem; margin-bottom: 1rem;
-    }
-    .hero p {
-      font-size: 1.25rem; margin-bottom: 2rem;
-      max-width: 60ch;
-    }
-    .cta {
-      display: inline-block;
-      padding: .75rem 1.5rem;
-      background: var(--accent);
-      color: #001b12;
-      border: none;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-    }
+    .cta:hover{transform:translateY(-2px)}
+    .cta:active{transform:translateY(0);opacity:.9}
+    .cta:focus-visible{outline:none;box-shadow:var(--focus)}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"></div>
 
-  <header>
-    <div class="logo">LOGO</div>
-    <nav>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
-
   <main class="container hero">
-    <h1>Dark Base Template</h1>
-    <p>This is a minimal base for your dark / tech themed site. You can build from here.</p>
-    <a class="cta" href="#contact">Contact Us</a>
+    <div class="stack">
+      <h1>EVOUT — Marketing & IT Solutions for your business</h1>
+      <p class="lead">Coming soon.</p>
+      <button id="loginBtn" class="cta" type="button" aria-describedby="loginHint">Login</button>
+      <span id="loginHint" class="sr-only">Press to enter password and go to workspace</span>
+    </div>
   </main>
 
-  <section id="contact" class="container" style="padding-block: 10vh">
-    <h2>Contact Section</h2>
-    <p>Here you can put form / details / anything.</p>
-  </section>
-
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const pwd = prompt('Enter password:');
+      if (pwd === null) return;               // cancel
+      if (pwd === 'sulkowski') {
+        // Navigate to the workspace route (create /workspace/index.html in your repo)
+        window.location.href = '/workspace';
+      } else {
+        alert('Incorrect password');
+      }
+    });
+  </script>
 </body>
 </html>
