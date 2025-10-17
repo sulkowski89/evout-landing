@@ -5,16 +5,62 @@
   <title>EVOUT — Workspace</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    html,body{height:100%;margin:0;background:#000;color:#fff;display:grid;place-items:center;font-family:system-ui}
-    a{color:#00ff99;text-decoration:none}
-    a:hover{text-decoration:underline}
+    /* Ukrywamy body domyślnie, żeby uniknąć flasha treści przed sprawdzeniem hasła */
+    html.auth-checked body { display: grid; place-items: center; height: 100%; margin: 0; background: #000; color: #fff; font-family: system-ui; }
+    html:not(.auth-checked) body { visibility: hidden; height: 100vh; margin: 0; background: #000; }
+    a { color: #00ff99; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .logout { display:inline-block; margin-top:1rem; color:#fff; background:rgba(255,255,255,0.03); padding:.4rem .7rem; border-radius:8px; }
   </style>
+
+  <script>
+    // Client-side gate (wciąż: hasło widoczne w źródle -> NIE zabezpiecza wrażliwych danych)
+    (function(){
+      const KEY = 'evout_workspace_auth';
+      const CORRECT = 'sulkowski';
+
+      // Jeżeli już zalogowany — ustaw klasę i zakończ
+      if (localStorage.getItem(KEY) === CORRECT) {
+        document.documentElement.classList.add('auth-checked');
+        return;
+      }
+
+      // Pokaż prompt
+      const p = prompt('Workspace password:');
+      if (p === CORRECT) {
+        localStorage.setItem(KEY, p);
+        // ustaw klasę, żeby pokazać body bez reloadu
+        document.documentElement.classList.add('auth-checked');
+        return;
+      }
+
+      // Brak lub zły kod -> wróć na stronę główną
+      try { window.location.replace('/'); }
+      catch(e) { window.location.href = '/'; }
+    })();
+  </script>
 </head>
 <body>
   <main>
     <h1>EVOUT — Workspace</h1>
     <p>Welcome to the work area.</p>
+
+    <!-- prosty logout -->
+    <p>
+      <a class="logout" href="#" id="logout">Logout</a>
+    </p>
+
     <p><a href="/">← Back to landing</a></p>
   </main>
+
+  <script>
+    // logout handler
+    document.getElementById('logout').addEventListener('click', function(e){
+      e.preventDefault();
+      localStorage.removeItem('evout_workspace_auth');
+      // optionally redirect to landing
+      window.location.href = '/';
+    });
+  </script>
 </body>
 </html>
