@@ -21,7 +21,7 @@
 
     /* ruchomy grid */
     .bg{
-      position:fixed;inset:0;z-index:-1;
+      position:fixed;inset:0;z-index:-2;
       background-image:
         repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid-size)),
         repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid-size));
@@ -43,12 +43,13 @@
                                  var(--grid-size) calc(-1 * var(--grid-size))}
     }
 
-    /* layout */
+    /* login */
     header{
       position:fixed;
       top:0; right:0; left:0;
       display:flex; justify-content:flex-end;
       padding:1rem 1.5rem;
+      z-index:10;
     }
     .login-btn{
       background:transparent;
@@ -65,6 +66,7 @@
       color:#001b12;
     }
 
+    /* hero + overlay */
     .hero{
       height:100vh;
       display:flex;
@@ -72,8 +74,22 @@
       justify-content:center;
       align-items:center;
       text-align:center;
+      position:relative;
       padding:0 1rem;
+      z-index:5;
     }
+    .hero-overlay{
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      background: radial-gradient(
+        circle at center,
+        rgba(0,0,0,0.8) 0%,
+        rgba(0,0,0,0.6) 40%,
+        rgba(0,0,0,0) 100%
+      );
+    }
+
     h1{
       font-size:clamp(3rem,10vw,6rem);
       font-weight:800;
@@ -100,6 +116,7 @@
   </header>
 
   <main class="hero">
+    <div class="hero-overlay" aria-hidden="true"></div>
     <h1>EVOUT</h1>
     <h2>Marketing & IT Solutions</h2>
     <p>Coming soon</p>
