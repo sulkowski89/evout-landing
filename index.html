@@ -1,50 +1,62 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
-  <meta charset="utf-8">
-  <title>EVOUT - Marketing & IT Solutions</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <meta charset="utf-8" />
+  <title>EVOUT — Smart Web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root{
+      /* łatwe strojenie */
+      --grid-size: 30px;          /* rozmiar kratki */
+      --line: rgba(255,255,255,.10); /* kolor linii */
+      --blur: 2px;                /* siła „glow” */
+      --speed: 12s;               /* czas jednego cyklu */
+    }
+
     html, body {
       height: 100%;
       margin: 0;
       background: #000;
+      color-scheme: dark;
       overflow: hidden;
     }
 
-    .grid {
+    .bg {
       position: fixed;
       inset: 0;
+      /* ostry, lekki, wydajny wzór: dwie powtarzalne osie */
       background-image:
-        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-      background-size: 30px 30px;          /* kafelek 60×60 */
-      animation: moveGrid 12s linear infinite;
+        repeating-linear-gradient(  0deg, var(--line) 0 1px, transparent 1px var(--grid-size)),
+        repeating-linear-gradient( 90deg, var(--line) 0 1px, transparent 1px var(--grid-size));
+      background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
+      animation: drift var(--speed) linear infinite;
       will-change: background-position;
     }
 
-    /* Klucz: przesuwamy o dokładnie 60px w poziomie i -60px w pionie */
-    @keyframes moveGrid {
-      0%   { background-position:   0px    0px,   0px    0px; }
-      100% { background-position:  90px  -90px,  90px  -90px; }
+    /* miękki „glow” bez kopiowania wzoru w CSS */
+    .bg::after{
+      content:"";
+      position:absolute; inset:0;
+      background: inherit;
+      filter: blur(var(--blur));
+      opacity:.5;
+      pointer-events:none;
     }
 
-    .grid::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: inherit;
-      filter: blur(2px);
-      opacity: 0.5;
-      pointer-events: none;
+    /* przesuwamy o dokładnie 1× rozmiar kafla → pętla bez szwu */
+    @keyframes drift{
+      0%   { background-position: 0 0, 0 0; }
+      100% { background-position: var(--grid-size) calc(-1 * var(--grid-size)),
+                                 var(--grid-size) calc(-1 * var(--grid-size)); }
+    }
+
+    /* szacunek dla preferencji dostępności */
+    @media (prefers-reduced-motion: reduce){
+      .bg{ animation: none; }
     }
   </style>
 </head>
 <body>
-  <div class="grid"></div>
+  <div class="bg" aria-hidden="true"></div>
 </body>
 </html>
-
-
-
