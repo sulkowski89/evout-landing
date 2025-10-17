@@ -2,78 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EVOUT</title>
-  <h1>Marketing & IT Solutions</h1>
+  <title>EVOUT — Coming Soon</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="EVOUT — Marketing & IT Solutions for your business. Coming soon." />
+  <meta name="description" content="EVOUT — Marketing & IT Solutions" />
   <style>
     :root{
-      --bg:#000; --fg:#fff; --muted:#a1a1aa; --accent:#00ff99;
+      --bg:#000;
+      --fg:#fff;
+      --accent:#00ff99;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
-      --container:1200px; --lh:1.5;
-      --h1:clamp(2rem,5vw,4rem); --h2:clamp(1.125rem,2.2vw,1.4rem);
-      --space-2:1rem; --space-3:1.5rem; --space-4:2rem;
-      --grid-size:30px; --line:rgba(255,255,255,.1); --blur:2px; --speed:12s;
-      --radius:16px; --focus:0 0 0 3px rgba(0,255,153,.35);
+      --grid-size:30px;
+      --line:rgba(255,255,255,.1);
+      --blur:2px;
+      --speed:12s;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);color-scheme:dark}
-    body{font-family:var(--font);line-height:var(--lh);overflow-x:hidden}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:var(--bg);color:var(--fg);font-family:var(--font);overflow:hidden}
 
-    /* Background grid */
-    .bg{position:fixed;inset:0;z-index:-1;
+    /* ruchomy grid */
+    .bg{
+      position:fixed;inset:0;z-index:-1;
       background-image:
         repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid-size)),
         repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid-size));
       background-size:var(--grid-size) var(--grid-size),var(--grid-size) var(--grid-size);
-      animation:drift var(--speed) linear infinite; will-change:background-position;
+      animation: drift var(--speed) linear infinite;
+      will-change: background-position;
     }
-    .bg::after{content:"";position:absolute;inset:0;background:inherit;filter:blur(var(--blur));opacity:.5;pointer-events:none}
+    .bg::after{
+      content:"";
+      position:absolute;inset:0;
+      background:inherit;
+      filter:blur(var(--blur));
+      opacity:.5;
+      pointer-events:none;
+    }
     @keyframes drift{
       0%{background-position:0 0,0 0}
       100%{background-position:var(--grid-size) calc(-1 * var(--grid-size)),
                                  var(--grid-size) calc(-1 * var(--grid-size))}
     }
-    @media (prefers-reduced-motion:reduce){.bg{animation:none}}
 
-    /* Layout */
-    .container{max-width:var(--container);margin-inline:auto;padding:min(6vh,var(--space-4)) var(--space-2)}
-    .hero{min-height:100dvh;display:grid;place-items:center;text-align:center}
-    .stack{display:flex;flex-direction:column;gap:var(--space-3);align-items:center}
-
-    h1{margin:0;font-weight:700;font-size:var(--h1);letter-spacing:-.02em}
-    p.lead{margin:0;font-weight:300;font-size:var(--h2);color:var(--muted);max-width:60ch}
-
-    .cta{
-      display:inline-block;margin-top:var(--space-3);padding:.9rem 1.25rem;border-radius:var(--radius);
-      background:var(--accent);color:#001b12;font-weight:700;text-decoration:none;border:0;cursor:pointer;
-      transition:transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+    /* layout */
+    header{
+      position:fixed;
+      top:0; right:0; left:0;
+      display:flex; justify-content:flex-end;
+      padding:1rem 1.5rem;
     }
-    .cta:hover{transform:translateY(-2px)}
-    .cta:active{transform:translateY(0);opacity:.9}
-    .cta:focus-visible{outline:none;box-shadow:var(--focus)}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .login-btn{
+      background:transparent;
+      color:var(--fg);
+      border:1px solid var(--accent);
+      padding:.5rem 1rem;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:.9rem;
+      transition:background .2s ease, color .2s ease;
+    }
+    .login-btn:hover{
+      background:var(--accent);
+      color:#001b12;
+    }
+
+    .hero{
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:0 1rem;
+    }
+    h1{
+      font-size:clamp(3rem,10vw,6rem);
+      font-weight:800;
+      letter-spacing:.05em;
+      margin-bottom:1rem;
+    }
+    h2{
+      font-size:clamp(1.2rem,3vw,2rem);
+      font-weight:300;
+      color:var(--accent);
+      margin-bottom:.75rem;
+    }
+    p{
+      font-size:clamp(.9rem,2vw,1.2rem);
+      color:#aaa;
+    }
   </style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"></div>
 
-  <main class="container hero">
-    <div class="stack">
-      <h1>EVOUT — Marketing & IT Solutions for your business</h1>
-      <p class="lead">Coming soon.</p>
-      <button id="loginBtn" class="cta" type="button" aria-describedby="loginHint">Login</button>
-      <span id="loginHint" class="sr-only">Press to enter password and go to workspace</span>
-    </div>
+  <header>
+    <button class="login-btn" id="loginBtn">Login</button>
+  </header>
+
+  <main class="hero">
+    <h1>EVOUT</h1>
+    <h2>Marketing & IT Solutions</h2>
+    <p>Coming soon</p>
   </main>
 
   <script>
     document.getElementById('loginBtn').addEventListener('click', () => {
       const pwd = prompt('Enter password:');
-      if (pwd === null) return;               // cancel
+      if (pwd === null) return;
       if (pwd === 'sulkowski') {
-        // Navigate to the workspace route (create /workspace/index.html in your repo)
-        window.location.href = '/workspace';
+        window.location.href = '/workspace/';
       } else {
         alert('Incorrect password');
       }
@@ -81,4 +118,3 @@
   </script>
 </body>
 </html>
-
