@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EVOUT — Hero Grid</title>
+  <title>EVOUT — Hero Grid (70%)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
+    :root{
       --grid: 30px;
       --line: rgba(255,255,255,.12);
       --speed: 12s;
@@ -23,62 +23,87 @@
       overflow: hidden;
     }
 
-    /* GRID */
+    /* Ruchomy grid */
     .grid {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0; z-index: -1;
       background-image:
-        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px var(--grid)),
+        repeating-linear-gradient(0deg,  var(--line) 0 1px, transparent 1px var(--grid)),
         repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid));
       background-size: var(--grid) var(--grid), var(--grid) var(--grid);
       animation: drift var(--speed) linear infinite;
       will-change: background-position;
     }
-    .grid::after {
-      content:"";
-      position:absolute; inset:0;
-      background:inherit;
-      filter: blur(var(--glow));
-      opacity:.6;
-      pointer-events:none;
+    .grid::after{
+      content:""; position:absolute; inset:0; background:inherit; filter:blur(var(--glow)); opacity:.6;
     }
-
-    @keyframes drift {
-      0% { background-position: 0 0, 0 0; }
+    @keyframes drift{
+      0%   { background-position: 0 0, 0 0; }
       100% { background-position: var(--grid) calc(-1 * var(--grid)),
-                                     var(--grid) calc(-1 * var(--grid)); }
+                                   var(--grid) calc(-1 * var(--grid)); }
     }
 
     /* HERO */
     .hero {
-      position: relative;
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    h1 {
-      font-size: 70vw;            /* ← tekst zajmuje 70% szerokości ekranu */
-      font-weight: 800;
-      text-transform: uppercase;
-      white-space: nowrap;
-      line-height: 1;
+      display: grid;
+      place-items: center;
       text-align: center;
     }
 
-    /* Ograniczenie dla mobile, żeby nie było za duże */
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 80vw;
-      }
+    /* Pudełko o dokł. 70% szerokości ekranu */
+    .fitbox {
+      width: 70vw;   /* << dokładnie 70% viewportu */
+    }
+
+    /* Tekst – duży bazowy rozmiar; JS go skaluje idealnie */
+    .fittext {
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;   /* nigdy nie łam na dwie linie */
+      line-height: 1;
+      letter-spacing: .02em;
+      font-size: 20vw;       /* baza – celowo za duża */
+      margin: 0;
     }
   </style>
 </head>
 <body>
   <div class="grid" aria-hidden="true"></div>
+
   <section class="hero">
-    <h1>EVOUT</h1>
+    <div class="fitbox">
+      <h1 class="fittext" id="evout">EVOUT</h1>
+    </div>
   </section>
+
+  <script>
+    // Dopasowanie napisu do dokładnie 70% szerokości okna (70vw)
+    (function(){
+      const box  = document.querySelector('.fitbox');
+      const text = document.getElementById('evout');
+
+      function fitOnce(){
+        // reset, żeby odczytać aktualną szerokość tekstu przy bazowym rozmiarze
+        text.style.fontSize = '20vw';
+
+        const boxW  = box.clientWidth;   // 70vw
+        const textW = text.scrollWidth;  // szer. w px przy aktualnym foncie
+        if (textW === 0) return;
+
+        // skala ~ liniowa do font-size, więc ustawiamy nowy font-size
+        const currentPx = parseFloat(getComputedStyle(text).fontSize);
+        const scale     = boxW / textW;
+        text.style.fontSize = (currentPx * scale) + 'px';
+      }
+
+      function fit(){
+        fitOnce();        // 1. przybliżenie
+        requestAnimationFrame(fitOnce);  // 2. doprecyzowanie po reflow
+      }
+
+      window.addEventListener('load', fit);
+      window.addEventListener('resize', fit);
+    })();
+  </script>
 </body>
 </html>
