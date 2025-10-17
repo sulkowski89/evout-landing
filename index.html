@@ -2,116 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EVOUT — Smart Web & Automations</title>
+  <title>Template – Dark Base</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{
-      --bg:#000; --fg:#fff; --muted:#a1a1aa; --accent:#00ff99;
-      --font: system-ui,-apple-system,Segoe UI,Inter,Roboto,sans-serif;
-      --container:1200px; --lh:1.5; --h1:clamp(2.4rem,6vw,4.6rem); --h2:clamp(1.1rem,2.2vw,1.4rem);
-      --s2:1rem; --s3:1.5rem; --s4:2rem;
-      --grid:30px; --line:rgba(255,255,255,.14); --blur:2px; --speed:12s;
+    :root {
+      --bg: #000;
+      --fg: #fff;
+      --accent: #00ff99;
+      --font: system-ui, sans-serif;
+      --line: rgba(255,255,255,0.1);
+      --grid-size: 30px;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);color-scheme:dark}
-    body{font-family:var(--font);line-height:var(--lh);overflow-x:hidden}
 
-    /* GRID BACKGROUND (nieco jaśniejszy, by było widać pod hero) */
-    .bg{position:fixed;inset:0;z-index:-3;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+    .bg {
+      position: fixed; inset: 0;
       background-image:
-        repeating-linear-gradient(0deg,var(--line) 0 1px,transparent 1px var(--grid)),
-        repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px var(--grid));
-      background-size:var(--grid) var(--grid),var(--grid) var(--grid);
-      animation:drift var(--speed) linear infinite; will-change:background-position;
+        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px var(--grid-size)),
+        repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid-size));
+      background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
+      animation: drift 12s linear infinite;
     }
-    .bg::after{content:"";position:absolute;inset:0;background:inherit;filter:blur(var(--blur));opacity:.5;pointer-events:none}
-    @keyframes drift{
-      0%{background-position:0 0,0 0}
-      100%{background-position:var(--grid) calc(-1*var(--grid)),var(--grid) calc(-1*var(--grid))}
+    @keyframes drift {
+      0% { background-position: 0 0, 0 0; }
+      100% { background-position: var(--grid-size) calc(-1 * var(--grid-size)),
+                             var(--grid-size) calc(-1 * var(--grid-size)); }
     }
 
-    /* NAV — wyraźniejsze, płynne wejście rozmycia + przyciemnienia */
-    .nav{
-      position:sticky; top:0; z-index:20;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:.8rem 1rem;
-      backdrop-filter:blur(0px);
-      transition:backdrop-filter .5s ease;
+    .container {
+      position: relative;
+      max-width: 1200px; margin: auto;
+      padding: 2rem;
     }
-    .nav::before{
-      content:""; position:absolute; inset:0; pointer-events:none;
-      background:linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,0));
-      opacity:0; transition:opacity .5s ease;
+    header {
+      position: fixed; top: 0; width: 100%;
+      padding: 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
     }
-    .scrolled .nav{ backdrop-filter:blur(16px) }
-    .scrolled .nav::before{ opacity:1 }
-    .brand{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem}
-    .ghost{color:var(--muted);text-decoration:none;padding:.5rem .75rem;border-radius:8px}
-
-    /* LAYOUT */
-    .container{max-width:var(--container);margin-inline:auto;padding:min(6vh,var(--s4)) var(--s2)}
-    .hero{min-height:120dvh;display:grid;place-items:center;position:relative;text-align:center;isolation:isolate}
-
-    /* HERO MEDIA: poświata + (opcjonalnie) obraz, zanik ku dołowi */
-    .hero-media{
-      position:absolute; inset:0; z-index:-1;
-      background:
-        radial-gradient(80% 55% at 50% 0%, rgba(255,255,255,.10), rgba(255,255,255,0) 60%),
-        /* podmień poniższą linię, gdy dodasz grafikę */
-        linear-gradient(#050505, #050505);
-      background-blend-mode:screen, normal;
-      /* Maska: pełna widoczność u góry, przejście do transparentu niżej */
-      -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 85%);
-              mask-image:linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 85%);
+    header a { color: var(--fg); text-decoration: none; }
+    .hero {
+      height: 100vh; display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding-top: 4rem;
     }
-    /* Gdy będziesz mieć kosmos: background:
-         radial-gradient(80% 55% at 50% 0%, rgba(255,255,255,.10), rgba(255,255,255,0) 60%),
-         url('cosmos.jpg') center/cover no-repeat;  */
-
-    .stack{display:flex;flex-direction:column;gap:var(--s3);align-items:center}
-    h1{margin:0;font-weight:800;font-size:var(--h1);letter-spacing:-.02em}
-    .lead{margin:0;max-width:60ch;color:var(--muted);font-weight:300;font-size:var(--h2)}
-
-    .cta{
-      display:inline-block;margin-top:var(--s3);padding:.95rem 1.25rem;border-radius:16px;
-      background:var(--accent);color:#001b12;font-weight:800;text-decoration:none;
-      box-shadow:0 10px 30px rgba(0,0,0,.6);
-      transition:transform .2s ease,opacity .2s ease;
+    .hero h1 {
+      font-size: 3rem; margin-bottom: 1rem;
     }
-    .cta:hover{transform:translateY(-2px)}
-    .cta:active{transform:translateY(0);opacity:.9}
-
-    /* Dodatkowa sekcja by od razu zobaczyć scroll/blur */
-    .section{min-height:140dvh;display:grid;place-items:center}
+    .hero p {
+      font-size: 1.25rem; margin-bottom: 2rem;
+      max-width: 60ch;
+    }
+    .cta {
+      display: inline-block;
+      padding: .75rem 1.5rem;
+      background: var(--accent);
+      color: #001b12;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"></div>
 
-  <header class="nav" aria-label="Top navigation">
-    <div class="brand">EVOUT</div>
-    <a class="ghost" href="#contact">Contact</a>
+  <header>
+    <div class="logo">LOGO</div>
+    <nav>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
 
   <main class="container hero">
-    <div class="hero-media" aria-hidden="true"></div>
-    <div class="stack">
-      <h1>EVOUT - Marketing & IT Solutions</h1>
-      <p class="lead">Comming soon</p>
-      <a class="cta" href="#contact">Start</a>
-    </div>
+    <h1>Dark Base Template</h1>
+    <p>This is a minimal base for your dark / tech themed site. You can build from here.</p>
+    <a class="cta" href="#contact">Contact Us</a>
   </main>
 
-  <section id="contact" class="container section">
-    <p class="lead">Scroll here to feel the nav blur and see the grid clearly below the hero.</p>
+  <section id="contact" class="container" style="padding-block: 10vh">
+    <h2>Contact Section</h2>
+    <p>Here you can put form / details / anything.</p>
   </section>
 
-  <script>
-    // Płynne przejście stanu nawigacji
-    const onScroll = () => {
-      document.documentElement.classList.toggle('scrolled', window.scrollY > 8);
-    };
-    onScroll();
-    addEventListener('scroll', onScroll, { passive: true });
-  </script>
 </body>
 </html>
