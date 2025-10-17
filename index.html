@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EVOUT — Hero Grid (70%)</title>
+  <title>EVOUT — Coming Soon</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
       --grid: 30px;
       --line: rgba(255,255,255,.12);
-      --speed: 6s;
+      --speed: 12s;
       --glow: 1px;
       --fg: #fff;
+      --accent: #00ff99;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
     }
 
@@ -18,18 +19,18 @@
 
     html, body {
       height: 100%;
-      background: #000;                /* czarne tło bazowe */
+      background: #000;
       color: var(--fg);
       font-family: var(--font);
       overflow: hidden;
     }
 
-    /* ✅ GRID jako stała warstwa pod treścią */
+    /* GRID w tle */
     body{ position: relative; }
     body::before{
       content:"";
       position: fixed; inset: 0;
-      z-index: 0;                       /* nad tłem body, pod treścią */
+      z-index: 0;
       background-image:
         repeating-linear-gradient(0deg,  var(--line) 0 1px, transparent 1px var(--grid)),
         repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid));
@@ -45,28 +46,45 @@
                                    var(--grid) calc(-1 * var(--grid)); }
     }
 
-    /* Treść zawsze nad gridem */
-    .hero { 
-      position: relative; 
-      z-index: 1;                       /* ponad body::before */
-      height: 100vh; 
-      display: grid; 
-      place-items: center; 
-      text-align: center; 
+    /* HERO */
+    .hero {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 1.8s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Pudełko o szerokości dokładnie 70% viewportu */
-    .fitbox { width: 70vw; }
+    .fitbox { width: 70vw; margin-bottom: 1rem; }
 
-    /* Duży napis (skalowany JS-em do 70% szerokości) */
     h1.fittext{
       font-weight: 800;
       text-transform: uppercase;
       white-space: nowrap;
       line-height: 1;
       letter-spacing: .02em;
-      font-size: 20vw; /* baza – JS dopasuje */
+      font-size: 20vw;
       margin: 0;
+    }
+
+    .tagline {
+      font-size: clamp(1rem, 2vw, 1.8rem);
+      color: var(--accent);
+      font-weight: 400;
+      margin-bottom: 0.4rem;
+    }
+
+    .coming {
+      font-size: clamp(0.9rem, 1.5vw, 1.4rem);
+      color: #999;
+      font-weight: 300;
     }
   </style>
 </head>
@@ -75,17 +93,19 @@
     <div class="fitbox">
       <h1 class="fittext" id="evout">EVOUT</h1>
     </div>
+    <div class="tagline">Marketing & IT Solutions for your business</div>
+    <div class="coming">Coming soon</div>
   </section>
 
   <script>
-    // Dopasowanie tekstu do dokładnie 70% szerokości ekranu (70vw)
+    // dopasowanie fontu do szerokości fitboxa (70vw)
     (function(){
       const box  = document.querySelector('.fitbox');
       const text = document.getElementById('evout');
 
       function fitOnce(){
-        text.style.fontSize = '20vw';                 // reset
-        const boxW  = box.clientWidth;                // 70vw
+        text.style.fontSize = '20vw';
+        const boxW  = box.clientWidth;
         const textW = text.scrollWidth || 1;
         const currentPx = parseFloat(getComputedStyle(text).fontSize);
         const scale = boxW / textW;
@@ -93,7 +113,8 @@
       }
 
       function fit(){
-        fitOnce(); requestAnimationFrame(fitOnce);    // doprecyzowanie po reflow
+        fitOnce();
+        requestAnimationFrame(fitOnce);
       }
 
       window.addEventListener('load', fit);
