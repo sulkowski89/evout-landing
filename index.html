@@ -5,7 +5,7 @@
   <title>EVOUT — Hero Grid</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{
+    :root {
       --grid: 30px;
       --line: rgba(255,255,255,.12);
       --speed: 12s;
@@ -28,13 +28,13 @@
       position: fixed;
       inset: 0;
       background-image:
-        repeating-linear-gradient(  0deg, var(--line) 0 1px, transparent 1px var(--grid)),
-        repeating-linear-gradient( 90deg, var(--line) 0 1px, transparent 1px var(--grid));
+        repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px var(--grid)),
+        repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid));
       background-size: var(--grid) var(--grid), var(--grid) var(--grid);
       animation: drift var(--speed) linear infinite;
       will-change: background-position;
     }
-    .grid::after{
+    .grid::after {
       content:"";
       position:absolute; inset:0;
       background:inherit;
@@ -43,10 +43,10 @@
       pointer-events:none;
     }
 
-    @keyframes drift{
-      0%   { background-position: 0 0, 0 0; }
+    @keyframes drift {
+      0% { background-position: 0 0, 0 0; }
       100% { background-position: var(--grid) calc(-1 * var(--grid)),
-                                   var(--grid) calc(-1 * var(--grid)); }
+                                     var(--grid) calc(-1 * var(--grid)); }
     }
 
     /* HERO */
@@ -59,20 +59,24 @@
     }
 
     h1 {
-      width: 70vw;                 /* dokładnie 70% szerokości ekranu */
-      text-align: center;
-      font-size: clamp(3rem, 10vw, 8rem);
+      font-size: 70vw;            /* ← tekst zajmuje 70% szerokości ekranu */
       font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: 0.05em;
       text-transform: uppercase;
-      white-space: nowrap;        /* zapobiega łamaniu napisu */
+      white-space: nowrap;
+      line-height: 1;
+      text-align: center;
+    }
+
+    /* Ograniczenie dla mobile, żeby nie było za duże */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 80vw;
+      }
     }
   </style>
 </head>
 <body>
   <div class="grid" aria-hidden="true"></div>
-
   <section class="hero">
     <h1>EVOUT</h1>
   </section>
