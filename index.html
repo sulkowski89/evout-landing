@@ -1,125 +1,323 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- =========================
+       EVOUT Coming Soon — Single File
+       ========================= -->
   <meta charset="utf-8" />
-  <title>EVOUT — Coming Soon</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EVOUT — Coming Soon</title>
+  <meta name="description" content="EVOUT — marketing & IT solutions. Launching soon." />
+  <meta name="theme-color" content="#0ea5e9" />
+  <meta property="og:title" content="EVOUT — Coming Soon" />
+  <meta property="og:description" content="Marketing & IT solutions. Launching soon." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://evout.com" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind minimal config for dark mode tokens
+    tailwind.config = {
+      theme: { extend: {} }
+    }
+  </script>
+
   <style>
-    :root{
-      --grid: 30px;
-      --line: rgba(255,255,255,.12);
-      --speed: 12s;
-      --glow: 1px;
-      --fg: #fff;
-      --accent: #00ff99;
-      --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+    /* Design tokens (dark by default, respect light scheme) */
+    :root { --bg: 2 6 23; --fg: 241 245 249; } /* slate-950 / slate-100 */
+    @media (prefers-color-scheme: light) {
+      :root { --bg: 250 250 250; --fg: 15 23 42; }
     }
-
-    *{box-sizing:border-box;margin:0;padding:0}
-
-    html, body {
-      height: 100%;
-      background: #000;
-      color: var(--fg);
-      font-family: var(--font);
-      overflow: hidden;
+    html, body { height: 100%; }
+    body { background-color: rgb(var(--bg)); color: rgb(var(--fg)); }
+    /* Focus baseline */
+    :where(button, [href], input, select, textarea) {
+      outline: none;
     }
-
-    /* GRID w tle */
-    body{ position: relative; }
-    body::before{
-      content:"";
-      position: fixed; inset: 0;
-      z-index: 0;
-      background-image:
-        repeating-linear-gradient(0deg,  var(--line) 0 1px, transparent 1px var(--grid)),
-        repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px var(--grid));
-      background-size: var(--grid) var(--grid), var(--grid) var(--grid);
-      animation: drift var(--speed) linear infinite;
-      filter: blur(var(--glow));
-      opacity: .6;
-      pointer-events: none;
+    :where(button, [href], input, select, textarea):focus-visible {
+      box-shadow: 0 0 0 3px rgba(14,165,233,.5);
     }
-    @keyframes drift{
-      0%   { background-position: 0 0, 0 0; }
-      100% { background-position: var(--grid) calc(-1 * var(--grid)),
-                                   var(--grid) calc(-1 * var(--grid)); }
+    /* Floating animation (disabled with prefers-reduced-motion) */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
     }
-
-    /* HERO */
-    .hero {
-      position: relative;
-      z-index: 1;
-      height: 100vh;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      opacity: 0;
-      animation: fadeIn 1.8s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .fitbox { width: 70vw; margin-bottom: 1rem; }
-
-    h1.fittext{
-      font-weight: 800;
-      text-transform: uppercase;
-      white-space: nowrap;
-      line-height: 1;
-      letter-spacing: .02em;
-      font-size: 20vw;
-      margin: 0;
-    }
-
-    .tagline {
-      font-size: clamp(1rem, 2vw, 1.8rem);
-      color: var(--accent);
-      font-weight: 400;
-      margin-bottom: 0.4rem;
-    }
-
-    .coming {
-      font-size: clamp(0.9rem, 1.5vw, 1.4rem);
-      color: #999;
-      font-weight: 300;
+    @media (prefers-reduced-motion: reduce) {
+      .anim-float { animation: none !important; }
+      .anim-pulse { animation: none !important; }
     }
   </style>
-</head>
-<body>
-  <section class="hero">
-    <div class="fitbox">
-      <h1 class="fittext" id="evout">EVOUT</h1>
-    </div>
-    <div class="tagline">Marketing & IT Solutions for your business</div>
-    <div class="coming">Coming soon</div>
-  </section>
 
   <script>
-    // dopasowanie fontu do szerokości fitboxa (70vw)
-    (function(){
-      const box  = document.querySelector('.fitbox');
-      const text = document.getElementById('evout');
+    /* =========================
+       CONFIG (łatwe do zmiany)
+       ========================= */
+    const SITE = {
+      name: "EVOUT",
+      email: "info@evout.com",
+      locales: ["en","de","pl"],
+      defaultLocale: "en",
+      themeColor: "#0ea5e9"
+    };
+    const INTRO = { minShowMs: 800 };
+    const LANG_UI = { storageKey: "evout-lang" };
 
-      function fitOnce(){
-        text.style.fontSize = '20vw';
-        const boxW  = box.clientWidth;
-        const textW = text.scrollWidth || 1;
-        const currentPx = parseFloat(getComputedStyle(text).fontSize);
-        const scale = boxW / textW;
-        text.style.fontSize = (currentPx * scale) + 'px';
+    const MESSAGES = {
+      en: {
+        hero: {
+          title: "Marketing & IT solutions for brands that want momentum",
+          subtitle: "We blend strategy, design and engineering to build growth engines: performance marketing, modern web, and product tooling.",
+          comingSoon: "Coming soon"
+        }
+      },
+      de: {
+        hero: {
+          title: "Marketing- und IT-Lösungen für Marken mit Ambition",
+          subtitle: "Wir verbinden Strategie, Design und Engineering: Performance-Marketing, moderne Websites und produktnahe Tools.",
+          comingSoon: "Demnächst"
+        }
+      },
+      pl: {
+        hero: {
+          title: "Marketing i rozwiązania IT dla marek, które chcą rosnąć",
+          subtitle: "Łączymy strategię, design i inżynierię: performance marketing, nowoczesne strony oraz narzędzia produktowe.",
+          comingSoon: "Wkrótce"
+        }
       }
+    };
 
-      function fit(){
-        fitOnce();
-        requestAnimationFrame(fitOnce);
+    /* =========================
+       i18n helpers
+       ========================= */
+    function getLangFromURL() {
+      const u = new URL(window.location.href);
+      const p = (u.searchParams.get("lang") || "").toLowerCase();
+      return SITE.locales.includes(p) ? p : null;
+    }
+    function getInitialLang() {
+      return getLangFromURL() || localStorage.getItem(LANG_UI.storageKey) || SITE.defaultLocale;
+    }
+    function setLang(lang, { persist=true, updateURL=true } = {}) {
+      if (!SITE.locales.includes(lang)) lang = SITE.defaultLocale;
+      if (persist) localStorage.setItem(LANG_UI.storageKey, lang);
+      if (updateURL) {
+        const u = new URL(window.location.href);
+        u.searchParams.set("lang", lang);
+        history.replaceState(null, "", u.toString());
       }
+      applyTranslations(lang);
+      updateLangBadge(lang);
+    }
+    function applyTranslations(lang) {
+      const t = (MESSAGES[lang] || MESSAGES[SITE.defaultLocale]);
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        const val = key.split(".").reduce((acc, k) => (acc && acc[k] != null ? acc[k] : null), t);
+        if (typeof val === "string") el.textContent = val;
+      });
+      document.documentElement.lang = lang;
+    }
+    function updateLangBadge(lang) {
+      const el = document.getElementById("lang-badge");
+      if (el) el.textContent = (lang || SITE.defaultLocale).toUpperCase();
+    }
 
-      window.addEventListener('load', fit);
-      window.addEventListener('resize', fit);
-    })();
+    /* =========================
+       Preloader
+       ========================= */
+    function runPreloader() {
+      const overlay = document.getElementById("preloader");
+      const start = Date.now();
+      const finish = () => {
+        const elapsed = Date.now() - start;
+        const wait = Math.max(0, INTRO.minShowMs - elapsed);
+        setTimeout(() => {
+          overlay.classList.add("opacity-0", "pointer-events-none");
+          // remove from a11y tree
+          overlay.setAttribute("aria-hidden", "true");
+        }, wait);
+      };
+      // When content is ready enough (DOMContentLoaded is already fired at end of body)
+      finish();
+    }
+
+    /* =========================
+       Dialog helpers (language)
+       ========================= */
+    function openLangDialog() {
+      const dlg = document.getElementById("lang-dialog");
+      if (typeof dlg.showModal === "function") {
+        dlg.showModal();
+        // focus first button
+        const first = dlg.querySelector("button[data-lang]");
+        first && first.focus();
+      } else {
+        // Fallback: emulate modal via class
+        dlg.setAttribute("open", "");
+      }
+    }
+    function closeLangDialog() {
+      const dlg = document.getElementById("lang-dialog");
+      if (dlg.open && typeof dlg.close === "function") dlg.close();
+      else dlg.removeAttribute("open");
+    }
+
+    /* =========================
+       Init on DOMContentLoaded
+       ========================= */
+    document.addEventListener("DOMContentLoaded", () => {
+      // theme-color sync
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute("content", SITE.themeColor);
+
+      const lang = getInitialLang();
+      setLang(lang, { persist: true, updateURL: true });
+
+      // Wire language badge button
+      const btn = document.getElementById("lang-open");
+      btn?.addEventListener("click", () => openLangDialog());
+
+      // Wire dialog buttons
+      document.querySelectorAll("#lang-dialog button[data-lang]").forEach(b => {
+        b.addEventListener("click", () => {
+          const l = b.getAttribute("data-lang");
+          setLang(l);
+          closeLangDialog();
+        });
+      });
+
+      // Close on Esc (safety if <dialog> fallback)
+      document.getElementById("lang-dialog")?.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeLangDialog();
+        }
+      });
+
+      runPreloader();
+    });
+  </script>
+</head>
+<body class="antialiased selection:bg-sky-500/20 selection:text-sky-900">
+
+  <!-- Preloader / Intro -->
+  <div id="preloader" aria-hidden="false"
+       class="fixed inset-0 z-50 grid place-items-center bg-[rgb(2,6,23)] text-white transition-opacity duration-500">
+    <div class="flex items-center gap-3">
+      <!-- Logo glyph -->
+      <div aria-label="EVOUT" class="text-sky-400">
+        <svg width="28" height="28" viewBox="0 0 24 24" role="img" aria-hidden="true"
+             class="anim-pulse"
+             style="animation: pulse 1.2s ease-in-out infinite;">
+          <path d="M3 5l6.5 14 2.5-5 2.5 5L21 5" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="sr-only">EVOUT</span>
+      </div>
+      <span class="text-sm tracking-widest uppercase">EVOUT</span>
+    </div>
+    <style>
+      @keyframes pulse {
+        0%,100% { opacity: .6; }
+        50% { opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        svg.anim-pulse { animation: none !important; }
+      }
+    </style>
+  </div>
+
+  <main role="main" aria-label="Intro" class="relative min-h-dvh overflow-hidden">
+    <!-- Background FX: aurora -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0"
+         style="background:
+           radial-gradient(1200px 600px at 20% 20%, rgba(56,189,248,.25), transparent 60%),
+           radial-gradient(800px 400px at 80% 60%, rgba(168,85,247,.2), transparent 60%);">
+    </div>
+    <!-- Subtle grain -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
+         style="background-image:
+           url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%22440%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%%22 height=%22100%%22 filter=%22url(%23n)%22 opacity=%221%22/></svg>');">
+    </div>
+    <!-- Floating blobs (motion-safe) -->
+    <div aria-hidden="true" class="absolute inset-0"
+         style="mask: radial-gradient(400px 200px at 30% 30%, black, transparent 70%); -webkit-mask: radial-gradient(400px 200px at 30% 30%, black, transparent 70%);">
+      <div class="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-sky-500/20 blur-3xl anim-float"
+           style="animation: float 7s ease-in-out infinite;"></div>
+      <div class="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl anim-float"
+           style="animation: float 9s ease-in-out infinite;"></div>
+    </div>
+
+    <!-- UI -->
+    <div class="relative z-10 mx-auto px-6 py-16 sm:py-24">
+      <header class="flex items-center gap-3">
+        <div class="text-sky-400" aria-label="EVOUT">
+          <svg width="28" height="28" viewBox="0 0 24 24" role="img" aria-hidden="true">
+            <path d="M3 5l6.5 14 2.5-5 2.5 5L21 5" stroke="currentColor" stroke-width="2" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="sr-only">EVOUT</span>
+        </div>
+        <span class="text-sm tracking-widest uppercase text-white/80">EVOUT</span>
+      </header>
+
+      <section class="mt-10 md:mt-16 rounded-3xl border border-white/10 bg-black/30 backdrop-blur p-6 md:p-10 max-w-3xl">
+        <h1 class="text-3xl md:text-5xl font-semibold leading-tight" data-i18n="hero.title"></h1>
+        <p class="mt-4 text-base md:text-lg text-white/80" data-i18n="hero.subtitle"></p>
+
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs" data-i18n="hero.comingSoon"></span>
+
+          <a href="mailto:info@evout.com"
+             class="inline-flex items-center rounded-2xl bg-sky-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus-visible:ring"
+             aria-label="Email EVOUT">
+             info@evout.com
+          </a>
+        </div>
+      </section>
+
+      <footer class="mt-10 text-xs text-white/60">
+        © <span id="year"></span> EVOUT. All rights reserved.
+      </footer>
+    </div>
+
+    <!-- Language picker button -->
+    <div class="fixed top-3 right-3 z-40">
+      <button id="lang-open" type="button"
+              class="rounded-2xl border border-white/10 bg-black/30 px-3 py-1 text-xs backdrop-blur hover:bg-black/50"
+              aria-haspopup="dialog" aria-controls="lang-dialog">
+        <span id="lang-badge">EN</span>
+        <span class="sr-only">Change language</span>
+      </button>
+    </div>
+
+    <!-- Language dialog -->
+    <dialog id="lang-dialog" role="dialog" aria-modal="true"
+            class="rounded-2xl p-0 backdrop:bg-black/60">
+      <div class="min-w-64 rounded-2xl bg-neutral-900 text-white p-4">
+        <h2 class="text-sm font-medium mb-2">Choose language</h2>
+        <div class="flex gap-2">
+          <button data-lang="en" class="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/10">EN</button>
+          <button data-lang="de" class="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/10">DE</button>
+          <button data-lang="pl" class="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm hover:bg-white/10">PL</button>
+        </div>
+        <div class="mt-3 text-[11px] text-white/60">
+          <p>Press Esc to close.</p>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <script>
+    // Footer year
+    document.addEventListener("DOMContentLoaded", () => {
+      const y = document.getElementById("year");
+      if (y) y.textContent = String(new Date().getFullYear());
+    });
   </script>
 </body>
 </html>
