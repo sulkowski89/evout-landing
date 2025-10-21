@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,16 +15,12 @@
   <script>tailwind.config = { theme: { extend: {} } };</script>
 
   <style>
-    :root { --bg: 2 6 23; --fg: 241 245 249; } /* slate-950 / slate-100 */
-    @media (prefers-color-scheme: light) {
-      :root { --bg: 250 250 250; --fg: 15 23 42; }
-    }
+    :root { --bg: 2 6 23; --fg: 241 245 249; }
+    @media (prefers-color-scheme: light) { :root { --bg: 250 250 250; --fg: 15 23 42; } }
     html, body { height: 100%; }
     body { background-color: rgb(var(--bg)); color: rgb(var(--fg)); }
     :where(button, [href], input, select, textarea){ outline: none; }
-    :where(button, [href], input, select, textarea):focus-visible{
-      box-shadow: 0 0 0 3px rgba(14,165,233,.5);
-    }
+    :where(button, [href], input, select, textarea):focus-visible{ box-shadow: 0 0 0 3px rgba(14,165,233,.5); }
     @media (prefers-reduced-motion: reduce) { .anim { animation: none !important; } }
   </style>
 
@@ -33,135 +29,83 @@
     const SITE = {
       name: "EVOUT",
       email: "info@evout.com",
-      themeColor: "#0ea5e9"
+      themeColor: "#0ea5e9",
+      locales: ["en","de"],
+      defaultLocale: "en"
+    };
+
+    // ===== Copy =====
+    const MESSAGES = {
+      en: {
+        title: "Marketing & IT Solutions",
+        desc: "We shape brands through branding & visual identity, modern web design, smart automation, and high-performance web applications. Full site coming soon.",
+        badge: "Coming soon"
+      },
+      de: {
+        title: "Marketing & IT-Lösungen",
+        desc: "Wir formen Marken durch Branding & visuelle Identität, modernes Webdesign, smarte Automatisierung und leistungsstarke Webanwendungen. Vollständige Website folgt in Kürze.",
+        badge: "Demnächst"
+      }
     };
 
     // ===== Tunnel background (Canvas) =====
-    // Cyberpunk 3D tunnel grid: radial spokes + moving rings with neon glow
     let rafId = null;
     function tunnelInit() {
       const c = document.getElementById("bg-tunnel");
       const ctx = c.getContext("2d");
       const dpr = Math.max(1, window.devicePixelRatio || 1);
-
-      function resize() {
-        c.width = Math.floor(innerWidth * dpr);
-        c.height = Math.floor(innerHeight * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
-      }
-
-      resize();
-      window.addEventListener("resize", resize, { passive: true });
-
+      function resize() { c.width = Math.floor(innerWidth * dpr); c.height = Math.floor(innerHeight * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+      resize(); window.addEventListener("resize", resize, { passive: true });
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
       let t0 = performance.now();
       function draw(now) {
-        const w = c.width / dpr, h = c.height / dpr;
-        const cx = w / 2, cy = h / 2;
-        const maxR = Math.hypot(w, h);
-
-        // time
-        const t = (now - t0) / 1000;
-        // speed controls
-        const ringSpeed = 1.2; // rings per second
-        const spokeCount = 24; // radial grid density
-        const ringGap = 40;    // distance between rings (px)
-
-        // Clear with subtle vignette base
-        ctx.clearRect(0, 0, w, h);
-        const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
-        grd.addColorStop(0, "rgba(2,6,23,0.2)");
-        grd.addColorStop(1, "rgba(2,6,23,1)");
-        ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, w, h);
-
-        // Neon colors (cyan/purple)
-        const neon1 = "rgba(56,189,248,0.9)";   // sky-400
-        const neon2 = "rgba(168,85,247,0.9)";   // fuchsia-500
-        const gridColor = "rgba(255,255,255,0.08)";
-
-        ctx.save();
-        ctx.translate(cx, cy);
-
-        // Radial spokes
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = gridColor;
-        ctx.beginPath();
-        for (let i = 0; i < spokeCount; i++) {
-          const a = (i / spokeCount) * Math.PI * 2 + Math.sin(t * 0.5) * 0.03;
-          const x = Math.cos(a) * maxR;
-          const y = Math.sin(a) * maxR;
-          ctx.moveTo(0, 0);
-          ctx.lineTo(x, y);
-        }
+        const w = c.width / dpr, h = c.height / dpr, cx = w/2, cy = h/2, maxR = Math.hypot(w,h);
+        const t = (now - t0)/1000, ringSpeed = 1.2, spokeCount = 24, ringGap = 40;
+        ctx.clearRect(0,0,w,h);
+        const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,maxR);
+        grd.addColorStop(0,"rgba(2,6,23,0.2)"); grd.addColorStop(1,"rgba(2,6,23,1)"); ctx.fillStyle = grd; ctx.fillRect(0,0,w,h);
+        const neon1="rgba(56,189,248,0.9)", neon2="rgba(168,85,247,0.9)", gridColor="rgba(255,255,255,0.08)";
+        ctx.save(); ctx.translate(cx,cy);
+        ctx.lineWidth=1; ctx.strokeStyle=gridColor; ctx.beginPath();
+        for(let i=0;i<spokeCount;i++){ const a=(i/spokeCount)*Math.PI*2+Math.sin(t*0.5)*0.03; ctx.moveTo(0,0); ctx.lineTo(Math.cos(a)*maxR, Math.sin(a)*maxR); }
         ctx.stroke();
-
-        // Moving rings (simulate forward motion by offsetting)
-        // We draw many rings with perspective-like scaling (slight pulsation)
-        const ringCount = Math.ceil(maxR / ringGap) + 2;
-        const offset = (t * ringSpeed * ringGap) % ringGap;
-
-        for (let i = 0; i < ringCount; i++) {
-          const r = i * ringGap - offset;
-          if (r <= 0) continue;
-
-          // glow: alternate cyan/purple
-          const useNeon1 = i % 2 === 0;
-          const color = useNeon1 ? neon1 : neon2;
-
-          // base thin grid ring
-          ctx.strokeStyle = gridColor;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.arc(0, 0, r, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // neon glow overlay (fainter with distance)
-          const glowAlpha = Math.max(0, 1 - r / (maxR * 0.9));
-          if (glowAlpha > 0.02) {
-            ctx.strokeStyle = color.replace(/0\.9\)/, (0.35 * glowAlpha).toFixed(3) + ")");
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 15 * glowAlpha * 2;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-          }
+        const ringCount=Math.ceil(maxR/ringGap)+2, offset=(t*ringSpeed*ringGap)%ringGap;
+        for(let i=0;i<ringCount;i++){ const r=i*ringGap-offset; if(r<=0) continue;
+          ctx.strokeStyle=gridColor; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke();
+          const use1=i%2===0, color=use1?neon1:neon2, glowAlpha=Math.max(0,1-r/(maxR*0.9));
+          if(glowAlpha>0.02){ ctx.strokeStyle=color.replace(/0\.9\)/,(0.35*glowAlpha).toFixed(3)+")"); ctx.shadowColor=color; ctx.shadowBlur=15*glowAlpha*2; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke(); ctx.shadowBlur=0; }
         }
-
         ctx.restore();
-
-        // Extra soft aurora swirls on top
-        const aurora = ctx.createRadialGradient(cx * 0.6, cy * 0.5, 0, cx * 0.6, cy * 0.5, maxR * 0.9);
-        aurora.addColorStop(0, "rgba(56,189,248,0.12)");
-        aurora.addColorStop(1, "rgba(56,189,248,0)");
-        ctx.fillStyle = aurora;
-        ctx.fillRect(0, 0, w, h);
-
-        const aurora2 = ctx.createRadialGradient(cx * 1.2, cy * 1.1, 0, cx * 1.2, cy * 1.1, maxR * 0.9);
-        aurora2.addColorStop(0, "rgba(168,85,247,0.10)");
-        aurora2.addColorStop(1, "rgba(168,85,247,0)");
-        ctx.fillStyle = aurora2;
-        ctx.fillRect(0, 0, w, h);
-
-        if (!prefersReduced) rafId = requestAnimationFrame(draw);
+        const a1=ctx.createRadialGradient(cx*0.6,cy*0.5,0,cx*0.6,cy*0.5,maxR*0.9); a1.addColorStop(0,"rgba(56,189,248,0.12)"); a1.addColorStop(1,"rgba(56,189,248,0)"); ctx.fillStyle=a1; ctx.fillRect(0,0,w,h);
+        const a2=ctx.createRadialGradient(cx*1.2,cy*1.1,0,cx*1.2,cy*1.1,maxR*0.9); a2.addColorStop(0,"rgba(168,85,247,0.10)"); a2.addColorStop(1,"rgba(168,85,247,0)"); ctx.fillStyle=a2; ctx.fillRect(0,0,w,h);
+        if(!prefersReduced) rafId=requestAnimationFrame(draw);
       }
-
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        draw(performance.now()); // single frame
-      } else {
-        rafId = requestAnimationFrame(draw);
-      }
-
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) draw(performance.now()); else rafId=requestAnimationFrame(draw);
       return () => { cancelAnimationFrame(rafId); window.removeEventListener("resize", resize); };
+    }
+
+    // ===== i18n (EN default, DE optional) =====
+    const LANG_KEY = "evout-lang";
+    function getLangFromURL(){ const u=new URL(window.location.href); const p=(u.searchParams.get("lang")||"").toLowerCase(); return SITE.locales.includes(p)?p:null; }
+    function getInitialLang(){ return getLangFromURL() || localStorage.getItem(LANG_KEY) || SITE.defaultLocale; }
+    function setLang(lang, {persist=true, updateURL=true}={}) {
+      if (!SITE.locales.includes(lang)) lang = SITE.defaultLocale;
+      if (persist) localStorage.setItem(LANG_KEY, lang);
+      if (updateURL){ const u=new URL(window.location.href); u.searchParams.set("lang",lang); history.replaceState(null,"",u.toString()); }
+      const t = MESSAGES[lang] || MESSAGES.en;
+      document.documentElement.lang = lang;
+      document.getElementById("subtitle").textContent = t.title;
+      document.getElementById("desc").textContent = t.desc;
+      document.getElementById("badge").textContent = t.badge;
+      document.getElementById("lang-badge").textContent = lang.toUpperCase();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelector('meta[name="theme-color"]')?.setAttribute("content", SITE.themeColor);
       tunnelInit();
       const y = document.getElementById("year"); if (y) y.textContent = String(new Date().getFullYear());
+      const init = getInitialLang(); setLang(init, {persist:true, updateURL:true});
+      document.querySelectorAll("[data-lang]").forEach(btn => btn.addEventListener("click", () => setLang(btn.getAttribute("data-lang"))));
     });
   </script>
 </head>
@@ -169,26 +113,34 @@
   <!-- Canvas background -->
   <canvas id="bg-tunnel" class="fixed inset-0 -z-10"></canvas>
 
+  <!-- Language switch (EN/DE) -->
+  <div class="fixed top-3 right-3 z-40">
+    <div class="rounded-2xl border border-white/10 bg-black/30 px-2 py-1 text-xs backdrop-blur flex items-center gap-1">
+      <span id="lang-badge" class="px-2 py-0.5 rounded-md bg-white/5">EN</span>
+      <button data-lang="en" class="px-2 py-0.5 rounded-md hover:bg-white/10">EN</button>
+      <button data-lang="de" class="px-2 py-0.5 rounded-md hover:bg-white/10">DE</button>
+    </div>
+  </div>
+
   <!-- Content centered -->
   <main class="min-h-dvh grid place-items-center px-6">
     <section class="w-full max-w-3xl text-center rounded-3xl border border-white/10 bg-black/30 backdrop-blur p-8 md:p-12">
       <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">
         <span class="bg-clip-text text-transparent bg-gradient-to-br from-sky-400 to-fuchsia-500">EVOUT</span>
       </h1>
-      <h2 class="mt-3 text-lg md:text-xl text-white/80">Marketing &amp; IT Solutions</h2>
+      <h2 id="subtitle" class="mt-3 text-lg md:text-xl text-white/80">Marketing &amp; IT Solutions</h2>
 
-      <p class="mt-6 text-base md:text-lg text-white/80">
-        Łączymy marketing i rozwiązania IT: strategia, kreacja i inżynieria — pod wzrost i efektywność.
-        Strona w przygotowaniu.
+      <p id="desc" class="mt-6 text-base md:text-lg text-white/80">
+        We shape brands through branding &amp; visual identity, modern web design, smart automation, and high-performance web applications. Full site coming soon.
       </p>
 
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <span class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wide">
+        <span id="badge" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-wide">
           Coming soon
         </span>
         <a href="mailto:info@evout.com"
            class="inline-flex items-center rounded-2xl bg-sky-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus-visible:ring"
-           aria-label="Wyślij email do EVOUT">
+           aria-label="Email EVOUT">
           info@evout.com
         </a>
       </div>
